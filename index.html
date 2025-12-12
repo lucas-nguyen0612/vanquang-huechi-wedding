@@ -41,7 +41,7 @@
       content="https://vanquang-huechi-wedding.vercel.app/"
     />
 
-    <meta property="og:title" content="Mẫu Thiệp 9" />
+    <meta property="og:title" content="Huệ Chi ♥️ Văn Quang" />
     <meta property="og:type" content="website" />
     <meta
       property="og:image"
@@ -14982,8 +14982,24 @@
     <script>
       const music = document.getElementById("bgMusic");
       const toggleBtn = document.getElementById("toggleMusic");
-      let isPlaying = true;
+      let isPlaying = false;
       let autoScroll = true;
+      let musicStarted = false;
+
+      // Hàm khởi động nhạc khi có tương tác đầu tiên
+      function startMusic() {
+        if (!musicStarted) {
+          music.play().then(() => {
+            isPlaying = true;
+            toggleBtn.innerHTML = "🔊";
+            musicStarted = true;
+          }).catch((error) => {
+            console.log("Autoplay bị chặn:", error);
+            isPlaying = false;
+            toggleBtn.innerHTML = "🔇";
+          });
+        }
+      }
 
       // Tự động cuộn trang
       function scrollDown() {
@@ -14994,7 +15010,22 @@
 
       window.addEventListener("load", () => {
         scrollDown();
+        // Thử phát nhạc ngay khi trang load
+        startMusic();
       });
+
+      // Bắt tương tác đầu tiên để phát nhạc (nếu autoplay bị chặn)
+      function handleFirstInteraction() {
+        startMusic();
+        // Xóa các event listener sau khi đã khởi động nhạc
+        document.removeEventListener("click", handleFirstInteraction);
+        document.removeEventListener("touchstart", handleFirstInteraction);
+        document.removeEventListener("keydown", handleFirstInteraction);
+      }
+
+      document.addEventListener("click", handleFirstInteraction);
+      document.addEventListener("touchstart", handleFirstInteraction);
+      document.addEventListener("keydown", handleFirstInteraction);
 
       // Dừng cuộn nếu người dùng tương tác bên ngoài nút nhạc
       document.addEventListener("click", function (e) {
@@ -15021,8 +15052,11 @@
           music.pause();
           toggleBtn.innerHTML = "🔇";
         } else {
-          music.play();
-          toggleBtn.innerHTML = "🔊";
+          music.play().then(() => {
+            toggleBtn.innerHTML = "🔊";
+          }).catch((error) => {
+            console.log("Không thể phát nhạc:", error);
+          });
         }
         isPlaying = !isPlaying;
       });

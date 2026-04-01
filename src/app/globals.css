@@ -1,0 +1,122 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* JL-Tools Dark Neon Background Tokens */
+    --bg-primary: #0a0a0f;
+    --bg-secondary: #12121a;
+    --bg-tertiary: #1a1a2e;
+    --bg-elevated: #22223a;
+
+    /* JL-Tools Neon Accent Tokens */
+    --neon-green: #00ff88;
+    --neon-pink: #ff0080;
+    --neon-blue: #00d4ff;
+    --neon-purple: #8b5cf6;
+    --neon-yellow: #ffdd00;
+    --neon-orange: #ff6b00;
+
+    /* JL-Tools Text Tokens */
+    --text-primary: #ffffff;
+    --text-secondary: #a0a0b0;
+    --text-muted: #606070;
+
+    /* shadcn/ui — dark theme defaults */
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 9%;
+    --secondary: 240 6.7% 8.6%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 6.7% 8.6%;
+    --muted-foreground: 240 5% 63.9%; /* dark theme: readable gray on dark bg */
+    --accent: 240 6.7% 8.6%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 6.7% 14.9%;
+    --input: 240 6.7% 14.9%;
+    --ring: 142 76% 36%;
+    --chart-1: 142 76% 36%;
+    --chart-2: 280 65% 60%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+    --radius: 0.5rem;
+  }
+
+  /* Dark is the default — no .dark {} wrapper needed */
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+  }
+}
+
+/* ============================================
+   JL-Tools Custom Utility Classes
+   ============================================ */
+
+@layer utilities {
+  /* --- Neon Text Utilities --- */
+  .text-neon-yellow {
+    color: #ffdd00;
+  }
+  .text-neon-orange {
+    color: #ff6b00;
+  }
+
+  /* --- Streak Color Utilities --- */
+  .text-streak-cold {
+    color: #606070;
+  }
+  .text-streak-warm {
+    color: #ffdd00;
+  }
+  .text-streak-hot {
+    color: #ff6b00;
+  }
+  .text-streak-pink {
+    color: #ff0080;
+  }
+  .text-streak-blazing {
+    background: linear-gradient(135deg, #ff4400, #ff0080);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* --- Glassmorphism Utility --- */
+  .glassmorphism {
+    background: rgba(18, 18, 26, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 0.75rem;
+  }
+
+  /* --- Background Token Utilities --- */
+  .bg-bg-primary {
+    background-color: #0a0a0f;
+  }
+  .bg-bg-secondary {
+    background-color: #12121a;
+  }
+  .bg-bg-tertiary {
+    background-color: #1a1a2e;
+  }
+  .bg-bg-elevated {
+    background-color: #22223a;
+  }
+}

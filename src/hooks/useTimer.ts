@@ -32,19 +32,34 @@ export function useTimer() {
     }
   }, [isRunning, tick])
 
-  // Tab visibility: catch up when tab becomes active
+  // Tab visibility: catch up ticks that were missed while hidden
+  const hiddenAtRef = useRef<number | null>(null)
   useEffect(() => {
-    function handleVisibilityChange() {
-      if (!document.hidden && isRunning && startedAt) {
-        const store = usePomodoroStore.getState()
-        const elapsed = Math.floor((Date.now() - startedAt) / 1000)
-        const newTimeLeft = Math.max(0, store.settings.workDuration - elapsed)
-        if (Math.abs(newTimeLeft - store.timeLeft) > 2) {
-          usePomodoroStore.setState({ timeLeft: newTimeLeft })
+    function onHide() {
+      if (document.hidden && usePomodoroStore.getState().isRunning) {
+        hiddenAtRef.current = Date.now()
+      }
+    }
+    function onShow() {
+      if (!document.hidden && hiddenAtRef.current !== null) {
+        const missedSeconds = Math.floor((Date.now() - hiddenAtRef.current) / 1000)
+        hiddenAtRef.current = null
+        if (missedSeconds > 0 && usePomodoroStore.getState().isRunning) {
+          const store = usePomodoroStore.getState()
+          const newTimeLeft = Math.max(0, store.timeLeft - missedSeconds)
+          if (newTimeLeft !== store.timeLeft) {
+            usePomodoroStore.setState({ timeLeft: newTimeLeft })
+            // If time ran out while hidden, complete the session
+            if (newTimeLeft === 0) store.tick()
+          }
         }
       }
     }
-    document.addEventListener('visibilitychange', handleVisibilityChange)
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
-  }, [isRunning, startedAt])
+    document.addEventListener('visibilitychange', onHide)
+    document.addEventListener('visibilitychange', onShow)
+    return () => {
+      document.removeEventListener('visibilitychange', onHide)
+      document.removeEventListener('visibilitychange', onShow)
+    }
+  }, [])
 }

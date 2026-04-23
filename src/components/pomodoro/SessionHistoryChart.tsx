@@ -68,14 +68,7 @@ export function SessionHistoryChart() {
   const best = days ? Math.max(...days.map(d => d.count)) : 0
 
   return (
-    <section
-      style={{
-        background: 'var(--jl-bg-raised)',
-        border: '1px solid var(--jl-line-soft)',
-        borderRadius: 'var(--jl-r-lg)',
-        padding: 20,
-      }}
-    >
+    <section>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
         <BarChart2 size={14} color="var(--jl-text-faint)" />
         <h3 style={{ margin: 0, fontSize: 13, fontWeight: 600 }}>Last 14 days</h3>

@@ -2,121 +2,119 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  :root {
-    /* JL-Tools Dark Neon Background Tokens */
-    --bg-primary: #0a0a0f;
-    --bg-secondary: #12121a;
-    --bg-tertiary: #1a1a2e;
-    --bg-elevated: #22223a;
+/* ===== JL Design Tokens ===== */
+/* Source: styles/tokens.css — Modern Cozy RPG aesthetic */
 
-    /* JL-Tools Neon Accent Tokens */
-    --neon-green: #00ff88;
-    --neon-pink: #ff0080;
-    --neon-blue: #00d4ff;
-    --neon-purple: #8b5cf6;
-    --neon-yellow: #ffdd00;
-    --neon-orange: #ff6b00;
+:root {
+  /* Type */
+  --jl-font-sans: "Geist", "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --jl-font-display: "Fraunces", "Cooper", "Georgia", serif;
+  --jl-font-mono: "JetBrains Mono", "IBM Plex Mono", ui-monospace, monospace;
 
-    /* JL-Tools Text Tokens */
-    --text-primary: #ffffff;
-    --text-secondary: #a0a0b0;
-    --text-muted: #606070;
+  /* Warm neutral palette (oklch) */
+  --jl-bg: oklch(0.985 0.008 80);
+  --jl-bg-raised: oklch(0.995 0.005 80);
+  --jl-bg-sunken: oklch(0.965 0.010 80);
+  --jl-line: oklch(0.90 0.012 80);
+  --jl-line-soft: oklch(0.94 0.010 80);
+  --jl-text: oklch(0.22 0.015 60);
+  --jl-text-soft: oklch(0.46 0.015 60);
+  --jl-text-faint: oklch(0.62 0.012 60);
 
-    /* shadcn/ui — dark theme defaults */
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 240 6.7% 8.6%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 6.7% 8.6%;
-    --muted-foreground: 240 5% 63.9%; /* dark theme: readable gray on dark bg */
-    --accent: 240 6.7% 8.6%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 6.7% 14.9%;
-    --input: 240 6.7% 14.9%;
-    --ring: 142 76% 36%;
-    --chart-1: 142 76% 36%;
-    --chart-2: 280 65% 60%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
-    --radius: 0.5rem;
-  }
+  /* Accents — tunable via Tweaks (hue rotates) */
+  --jl-hue: 38;                /* warm amber default */
+  --jl-accent: oklch(0.70 0.15 var(--jl-hue));
+  --jl-accent-strong: oklch(0.58 0.17 var(--jl-hue));
+  --jl-accent-soft: oklch(0.94 0.05 var(--jl-hue));
+  --jl-accent-ink: oklch(0.30 0.10 var(--jl-hue));
 
-  /* Dark is the default — no .dark {} wrapper needed */
+  /* Semantic (fixed hues, same chroma family) */
+  --jl-success: oklch(0.70 0.14 150);
+  --jl-warn:    oklch(0.75 0.14 70);
+  --jl-danger:  oklch(0.65 0.17 25);
+  --jl-info:    oklch(0.68 0.13 240);
+  --jl-epic:    oklch(0.62 0.17 300);
+
+  /* Rarity (RPG) */
+  --jl-common:    oklch(0.70 0.01 80);
+  --jl-uncommon:  oklch(0.68 0.14 150);
+  --jl-rare:      oklch(0.65 0.15 240);
+  --jl-legendary: oklch(0.70 0.15 var(--jl-hue));
+  --jl-mythic:    oklch(0.62 0.17 300);
+
+  /* Radii + shadow */
+  --jl-r-sm: 8px;
+  --jl-r:    12px;
+  --jl-r-lg: 18px;
+  --jl-r-xl: 28px;
+  --jl-shadow-sm: 0 1px 2px oklch(0.22 0.02 60 / 0.06), 0 1px 1px oklch(0.22 0.02 60 / 0.04);
+  --jl-shadow:    0 4px 12px oklch(0.22 0.02 60 / 0.07), 0 1px 2px oklch(0.22 0.02 60 / 0.04);
+  --jl-shadow-lg: 0 18px 40px oklch(0.22 0.02 60 / 0.10), 0 2px 4px oklch(0.22 0.02 60 / 0.05);
+
+  /* Layout */
+  --jl-gap: 20px;
 }
 
+.jl-dark {
+  --jl-bg: oklch(0.18 0.010 60);
+  --jl-bg-raised: oklch(0.22 0.012 60);
+  --jl-bg-sunken: oklch(0.15 0.010 60);
+  --jl-line: oklch(0.30 0.012 60);
+  --jl-line-soft: oklch(0.26 0.010 60);
+  --jl-text: oklch(0.96 0.008 80);
+  --jl-text-soft: oklch(0.76 0.010 60);
+  --jl-text-faint: oklch(0.58 0.010 60);
+  --jl-accent-soft: oklch(0.30 0.06 var(--jl-hue));
+  --jl-accent-ink: oklch(0.92 0.06 var(--jl-hue));
+}
+
+/* ===== shadcn/ui variable overrides ===== */
 @layer base {
+  :root {
+    --background: var(--jl-bg);
+    --foreground: var(--jl-text);
+    --card: var(--jl-bg-raised);
+    --card-foreground: var(--jl-text);
+    --popover: var(--jl-bg-raised);
+    --popover-foreground: var(--jl-text);
+    --primary: var(--jl-accent-strong);
+    --primary-foreground: white;
+    --secondary: var(--jl-bg-sunken);
+    --secondary-foreground: var(--jl-text);
+    --muted: var(--jl-bg-sunken);
+    --muted-foreground: var(--jl-text-soft);
+    --accent: var(--jl-accent-soft);
+    --accent-foreground: var(--jl-accent-ink);
+    --destructive: var(--jl-danger);
+    --destructive-foreground: white;
+    --border: var(--jl-line);
+    --input: var(--jl-line);
+    --ring: var(--jl-accent);
+    --radius: var(--jl-r);
+  }
+
+  .dark {
+    /* shadcn dark mode — mapped to jl-dark tokens */
+    --background: oklch(0.18 0.010 60);
+    --foreground: oklch(0.96 0.008 80);
+    --card: oklch(0.22 0.012 60);
+    --card-foreground: oklch(0.96 0.008 80);
+    --popover: oklch(0.22 0.012 60);
+    --popover-foreground: oklch(0.96 0.008 80);
+    --muted: oklch(0.15 0.010 60);
+    --muted-foreground: oklch(0.76 0.010 60);
+    --border: oklch(0.30 0.012 60);
+    --input: oklch(0.30 0.012 60);
+  }
+
   * {
     @apply border-border;
   }
+
   body {
-    background-color: var(--bg-primary);
-    color: var(--text-primary);
-  }
-}
-
-/* ============================================
-   JL-Tools Custom Utility Classes
-   ============================================ */
-
-@layer utilities {
-  /* --- Neon Text Utilities --- */
-  .text-neon-yellow {
-    color: #ffdd00;
-  }
-  .text-neon-orange {
-    color: #ff6b00;
-  }
-
-  /* --- Streak Color Utilities --- */
-  .text-streak-cold {
-    color: #606070;
-  }
-  .text-streak-warm {
-    color: #ffdd00;
-  }
-  .text-streak-hot {
-    color: #ff6b00;
-  }
-  .text-streak-pink {
-    color: #ff0080;
-  }
-  .text-streak-blazing {
-    background: linear-gradient(135deg, #ff4400, #ff0080);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  /* --- Glassmorphism Utility --- */
-  .glassmorphism {
-    background: rgba(18, 18, 26, 0.6);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 0.75rem;
-  }
-
-  /* --- Background Token Utilities --- */
-  .bg-bg-primary {
-    background-color: #0a0a0f;
-  }
-  .bg-bg-secondary {
-    background-color: #12121a;
-  }
-  .bg-bg-tertiary {
-    background-color: #1a1a2e;
-  }
-  .bg-bg-elevated {
-    background-color: #22223a;
+    @apply bg-background text-foreground;
+    font-family: var(--jl-font-sans);
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.45;
   }
 }

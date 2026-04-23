@@ -1,18 +1,21 @@
+import { redirect } from 'next/navigation'
+import { getUser } from '@/lib/supabase/server'
 import { TopBar } from '@/components/layout/TopBar'
+import { HabitsClient } from './HabitsClient'
+import { ToolErrorBoundary } from '@/components/errors/ToolErrorBoundary'
 
-export default function HabitsPage() {
+export default async function HabitsPage() {
+  const user = await getUser()
+  if (!user) redirect('/login')
+
   return (
-    <div className="flex flex-col h-full">
-      <TopBar title="Habits" subtitle="Daily check-ins & streaks" />
-      <div className="flex-1 flex items-center justify-center" style={{ color: 'var(--text-secondary)' }}>
-        <div className="text-center space-y-2">
-          <div style={{ fontSize: 48 }}>🔥</div>
-          <p className="text-lg" style={{ color: 'var(--text-primary)' }}>
-            Habit Tracker
-          </p>
-          <p className="text-sm">Coming in Sprint 3</p>
+    <ToolErrorBoundary toolName="Habit Tracker">
+      <div className="flex flex-col h-full">
+        <TopBar title="Habits" subtitle="Daily check-ins & streaks" />
+        <div className="flex-1 overflow-y-auto p-4">
+          <HabitsClient userId={user.id} />
         </div>
       </div>
-    </div>
+    </ToolErrorBoundary>
   )
 }

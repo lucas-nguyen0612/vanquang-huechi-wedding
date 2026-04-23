@@ -14,6 +14,7 @@ import { SoundscapeSelector } from '@/components/pomodoro/SoundscapeSelector'
 import { FocusBlocker } from '@/components/pomodoro/FocusBlocker'
 import { XPTickerPanel } from '@/components/pomodoro/XPTickerPanel'
 import { SessionHistoryChart } from '@/components/pomodoro/SessionHistoryChart'
+import { ToolErrorBoundary } from '@/components/errors/ToolErrorBoundary'
 
 const cardStyle: React.CSSProperties = {
   background: 'var(--jl-bg-raised)',
@@ -121,7 +122,7 @@ export default function PomodoroPage() {
   }
 
   return (
-    <>
+    <ToolErrorBoundary toolName="Pomodoro">
       {focusMode && <FocusModeOverlay onClose={() => setFocusMode(false)} />}
 
       <div className="flex flex-col h-full">
@@ -278,6 +279,6 @@ export default function PomodoroPage() {
           </div>
         </div>
       </div>
-    </>
+    </ToolErrorBoundary>
   )
 }

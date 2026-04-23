@@ -1,6 +1,6 @@
 'use client'
 
-import { type FC } from 'react'
+import React, { type FC } from 'react'
 import { format, subWeeks, startOfWeek, addDays, isSameDay } from 'date-fns'
 
 interface HeatmapProps {
@@ -14,7 +14,7 @@ function getIntensity(count: number, max: number): number {
   return Math.ceil((count / max) * 4)
 }
 
-export const Heatmap: FC<HeatmapProps> = ({ data, weeks = 26 }) => {
+export const Heatmap: FC<HeatmapProps> = React.memo(function Heatmap({ data, weeks = 26 }) {
   const today = new Date()
   const startDate = startOfWeek(subWeeks(today, weeks - 1), { weekStartsOn: 1 })
   const max = Math.max(...data.map(d => d.count), 1)
@@ -57,4 +57,4 @@ export const Heatmap: FC<HeatmapProps> = ({ data, weeks = 26 }) => {
       </div>
     </div>
   )
-}
+})

@@ -1,4 +1,4 @@
-import { type FC } from 'react'
+import React, { type FC } from 'react'
 
 interface XPBarProps {
   currentXP: number
@@ -7,7 +7,7 @@ interface XPBarProps {
   compact?: boolean
 }
 
-export const XPBar: FC<XPBarProps> = ({ currentXP, maxXP, level, compact = false }) => {
+export const XPBar: FC<XPBarProps> = React.memo(function XPBar({ currentXP, maxXP, level, compact = false }) {
   const pct = maxXP > 0 ? Math.min(100, (currentXP / maxXP) * 100) : 0
   const segments = 5
   const segmentWidth = 100 / segments
@@ -67,4 +67,4 @@ export const XPBar: FC<XPBarProps> = ({ currentXP, maxXP, level, compact = false
       </div>
     </div>
   )
-}
+})

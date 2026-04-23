@@ -1,18 +1,24 @@
+import { redirect } from 'next/navigation'
+import { getUser } from '@/lib/supabase/server'
 import { TopBar } from '@/components/layout/TopBar'
+import { ToolErrorBoundary } from '@/components/errors/ToolErrorBoundary'
+import { DeckListClient } from './DeckListClient'
 
-export default function FlashcardsPage() {
+export default async function FlashcardsPage() {
+  const user = await getUser()
+  if (!user) redirect('/login')
+
   return (
-    <div className="flex flex-col h-full">
-      <TopBar title="Flashcards" subtitle="Spaced repetition learning" />
-      <div className="flex-1 flex items-center justify-center" style={{ color: 'var(--text-secondary)' }}>
-        <div className="text-center space-y-2">
-          <div style={{ fontSize: 48 }}>📇</div>
-          <p className="text-lg" style={{ color: 'var(--text-primary)' }}>
-            Flashcard Decks
-          </p>
-          <p className="text-sm">Coming in Sprint 4</p>
+    <ToolErrorBoundary toolName="Flashcards">
+      <div className="flex flex-col h-full">
+        <TopBar
+          title="Flashcards"
+          subtitle="SM-2 spaced repetition · +2 XP per card"
+        />
+        <div className="flex-1 overflow-y-auto p-4">
+          <DeckListClient />
         </div>
       </div>
-    </div>
+    </ToolErrorBoundary>
   )
 }

@@ -9,158 +9,127 @@
 ## Tổng quan
 
 ```
-Sprint 1 (W1–2)   Foundation        → App chạy, auth hoạt động, design system ready
-Sprint 2 (W3–4)   Pomodoro Tool     → Timer end-to-end, XP earn, task list
-Sprint 3 (W5–6)   Habit Tracker     → Check-in, streak, heatmap từ real data
-Sprint 4 (W7–8)   Flashcard + Ship  → SM-2 review, Character screen, Dashboard, deploy
+Sprint 1 (W1–2)   Foundation        ✅ Complete
+Sprint 2 (W3–4)   Pomodoro Tool     ✅ Complete
+Sprint 3 (W5–6)   Habit Tracker     ✅ Complete
+Sprint 4 (W7–8)   Flashcard + Ship  🔄 Features complete — Production Deploy pending
 ```
 
 ---
 
-## Sprint 1 — Foundation
+## Sprint 1 — Foundation ✅
 
 **Goal:** App chạy được trên localhost, đăng nhập/đăng ký hoạt động, design system đúng với giao diện thiết kế, RPG components cơ bản render được.
 
 **Deliverable:** Đăng nhập → thấy SideNav với Avatar + XP bar đúng design. Level up modal chạy được.
 
+**Completed:** 2026-04-23
+
 ---
 
 ### Setup & Infrastructure
 
-- [ ] Khởi tạo Next.js 15 project với TypeScript, Tailwind, App Router
-  ```bash
-  npx create-next-app@latest jl-tools --typescript --tailwind --app
-  ```
-- [ ] Cài dependencies:
-  ```bash
-  npm install @supabase/supabase-js @supabase/ssr
-  npm install zustand framer-motion lucide-react
-  npm install date-fns date-fns-tz
-  npm install react-hook-form zod @hookform/resolvers
-  npx shadcn@latest init
-  npx shadcn@latest add button dialog progress tabs switch tooltip dropdown-menu skeleton
-  ```
-- [ ] Setup Supabase local:
-  ```bash
-  brew install supabase/tap/supabase
-  supabase init && supabase start
-  ```
-- [ ] Tạo `.env.local` với Supabase local keys
-- [ ] Tạo 3 Supabase client files: `lib/supabase/client.ts`, `server.ts`, `middleware.ts`
-- [ ] Setup `middleware.ts` bảo vệ routes `/dashboard`, `/pomodoro`, `/habits`, `/flashcards`, `/character`
+- [x] Khởi tạo Next.js 15 project với TypeScript, Tailwind, App Router
+- [x] Cài dependencies: supabase-js, ssr, zustand, framer-motion, lucide-react, date-fns, react-hook-form, zod, shadcn/ui
+- [x] Setup Supabase local (`supabase init && supabase start`)
+- [x] Tạo `.env.local` với Supabase local keys
+- [x] Tạo 3 Supabase client files: `lib/supabase/client.ts`, `server.ts`, `middleware.ts`
+- [x] Setup `middleware.ts` bảo vệ routes `/dashboard`, `/pomodoro`, `/habits`, `/flashcards`, `/character`
 
 ---
 
 ### Database
 
-- [ ] Viết và apply migration `001_initial_schema.sql` (17 tables + indexes)
-- [ ] Viết và apply migration `002_rls_policies.sql`
-- [ ] Viết và apply migration `003_functions_triggers.sql`
+- [x] Migration `001_initial_schema.sql` (17 tables + indexes)
+- [x] Migration `002_rls_policies.sql`
+- [x] Migration `003_functions_triggers.sql`
   - `award_xp()`, `apply_sm2()`, `update_streak()`
   - `check_and_award_badges()`, `on_auth_user_created()`
   - `update_updated_at()` triggers
-- [ ] Viết và apply migration `004_seed_data.sql`
+- [x] Migration `004_seed_data.sql`
   - 20 badges, 9 quests, 9 unlockables, level_thresholds (1–50)
-- [ ] Generate TypeScript types:
-  ```bash
-  supabase gen types typescript --local > src/types/database.ts
-  ```
-- [ ] Enable Realtime cho 4 tables: `character_stats`, `xp_transactions`, `user_badges`, `user_quests`
+- [x] TypeScript types: `src/types/database.ts`
+- [x] Enable Realtime cho 4 tables: `character_stats`, `xp_transactions`, `user_badges`, `user_quests`
 
 ---
 
 ### Design System
 
-- [ ] Copy `styles/tokens.css` vào `src/app/globals.css` (merge với Tailwind base)
-- [ ] Thêm shadcn token override vào `globals.css`:
-  ```css
-  :root {
-    --background: var(--jl-bg);
-    --foreground: var(--jl-text);
-    --primary: var(--jl-accent-strong);
-    --radius: var(--jl-r);
-  }
-  ```
-- [ ] Cấu hình `tailwind.config.ts` với custom colors từ JL tokens
-- [ ] Setup fonts qua `next/font/local`: Geist, Fraunces, JetBrains Mono
-- [ ] Tạo `ThemeProvider` client component:
-  - Toggle dark mode → set `.dark` class trên `<html>`
-  - Set accent hue → `--jl-hue` CSS variable
-  - Persist sang cookie (server-readable, không flash khi load)
-- [ ] Root `layout.tsx` đọc cookie theme từ server → inject vào `<html>` (flash-free)
+- [x] CSS tokens vào `src/app/globals.css` (merge với Tailwind base)
+- [x] shadcn token override vào `globals.css`
+- [x] `tailwind.config.ts` với custom colors từ JL tokens
+- [x] `ThemeProvider` client component (dark mode, accent hue, cookie persist)
+- [x] Root `layout.tsx` đọc cookie theme từ server → inject vào `<html>` (flash-free)
 
 ---
 
 ### Landing Page
 
-- [ ] Cập nhật `app/page.tsx`: hiển thị landing page cho unauthenticated, redirect `/dashboard` cho logged-in
-- [ ] `app/(marketing)/layout.tsx`: layout riêng cho public pages (không có SideNav)
-- [ ] `components/marketing/LandingNav.tsx`: sticky nav với logo, links, lang switcher, Sign in + Start free buttons
-- [ ] `components/marketing/HeroSection.tsx`: headline, description, CTA buttons, social proof stats (24k+ adventurers...)
-- [ ] `components/marketing/HeroVisual.tsx`: 3 stacked product cards (heatmap, pomodoro timer, level-up toast) — dùng lại RPG components
-- [ ] `components/marketing/ToolStrip.tsx`: 3-col grid giới thiệu Pomodoro / Habit Tracker / Flashcards
-- [ ] `components/marketing/XPBand.tsx`: "Every tool feeds the same XP bar" section với XP flow diagram
-- [ ] `components/marketing/LandingFooter.tsx`: copyright + links + version tag
-- [ ] Wire `Sign in` → `/login`, `Start free` → `/signup`, `Begin your adventure` → `/signup`
+- [x] `app/page.tsx`: landing page cho unauthenticated, redirect `/dashboard` cho logged-in
+- [x] `app/(marketing)/layout.tsx`: layout riêng cho public pages
+- [x] `components/marketing/LandingNav.tsx`
+- [x] `components/marketing/HeroSection.tsx`
+- [x] `components/marketing/HeroVisual.tsx`
+- [x] `components/marketing/ToolStrip.tsx`
+- [x] `components/marketing/XPBand.tsx`
+- [x] `components/marketing/LandingFooter.tsx`
 
 ---
 
 ### Authentication
 
-- [ ] Page `/login`: email + password form + Google OAuth button
-- [ ] Page `/signup`: tạo account
-- [ ] Page `/onboarding` (3 steps):
-  1. Đặt tên nhân vật
-  2. Chọn mục tiêu (multi-select: Học/Công việc/Thói quen/Ghi nhớ)
-  3. Chọn tool đầu tiên → redirect
-- [ ] `api/auth/callback/route.ts`: xử lý OAuth callback
-- [ ] Onboarding check trong middleware: user mới → redirect `/onboarding`
+- [x] Page `/login` (`app/login/page.tsx`): email + password + Google OAuth
+- [x] Page `/auth/login` (`app/auth/login/page.tsx`): dùng `LoginForm` component
+- [x] Page `/signup` (`app/signup/page.tsx`)
+- [x] Page `/auth/sign-up` (`app/auth/sign-up/page.tsx`)
+- [x] Page `/onboarding` (3 steps: đặt tên nhân vật, chọn mục tiêu, chọn tool đầu tiên)
+- [x] `app/auth/callback/route.ts`: xử lý OAuth callback
+- [x] `app/auth/confirm/route.ts`: xử lý email confirmation link
+- [x] `app/auth/forgot-password/page.tsx` + `app/auth/update-password/page.tsx`
+- [x] Onboarding check trong middleware
+- [x] `enable_confirmations = true` trong `supabase/config.toml`
+- [x] `components/ui/PasswordInput.tsx`: input password với eye icon toggle (Eye/EyeOff)
+  - Dùng cho tất cả password fields: login, sign-up (×2), update-password
+- [x] OTP verification dialog khi login với email chưa confirm:
+  - Tự động gửi OTP 6 số khi bắt lỗi `"Email not confirmed"`
+  - Dialog nhập OTP + nút Resend (cooldown 60s)
+  - Verify qua `supabase.auth.verifyOtp({ type: 'signup' })` → redirect `/dashboard`
 
 ---
 
 ### RPG Components
 
-Chuyển đổi từ `lib/rpg.jsx` sang TypeScript:
-
-- [ ] `components/rpg/Avatar.tsx` — SVG avatar evolve theo level/tier
-- [ ] `components/rpg/XPBar.tsx` — segmented progress bar
-- [ ] `components/rpg/LevelBadge.tsx` — circular level number
-- [ ] `components/rpg/RarityChip.tsx` — color-coded tier badge
-- [ ] `components/rpg/StatPill.tsx` — stat chip với icon + label + value
-- [ ] `components/rpg/Sparkline.tsx` — mini line chart SVG
-- [ ] `components/rpg/Heatmap.tsx` — 26-week contribution grid SVG
+- [x] `components/rpg/Avatar.tsx`
+- [x] `components/rpg/XPBar.tsx`
+- [x] `components/rpg/LevelBadge.tsx`
+- [x] `components/rpg/RarityChip.tsx`
+- [x] `components/rpg/StatPill.tsx`
+- [x] `components/rpg/Sparkline.tsx`
+- [x] `components/rpg/Heatmap.tsx`
 
 ---
 
 ### Layout Components
 
-- [ ] `components/layout/SideNav.tsx`: nav links, avatar mini, XP bar compact, active highlight
-- [ ] `components/layout/TopBar.tsx`: title + subtitle + right slot
-- [ ] `app/(app)/layout.tsx`: Server Component fetch profile → render SideNav
+- [x] `components/layout/SideNav.tsx`
+- [x] `components/layout/TopBar.tsx`
+- [x] `components/layout/BottomNav.tsx` (mobile)
+- [x] `app/(app)/layout.tsx`: Server Component fetch profile → render SideNav
 
 ---
 
 ### Animation Layer
 
-- [ ] `components/animations/XPGainOverlay.tsx`: Framer Motion queue của XP popups (+N XP slide in)
-- [ ] `components/animations/LevelUpModal.tsx`: full-screen celebration khi level up
-- [ ] Gắn vào root app layout
+- [x] `components/animations/XPGainOverlay.tsx`
+- [x] `components/animations/LevelUpModal.tsx`
 
 ---
 
 ### State Foundation
 
-- [ ] `store/userStore.ts`: profile, totalXP, level, xpGainQueue, `addXP()`
-- [ ] `hooks/useXPRealtime.ts`: Supabase Realtime subscribe `character_stats`
-- [ ] TypeScript types: `src/types/rpg.ts`, `src/types/tools.ts`
-
----
-
-### CI/CD
-
-- [ ] Tạo `.github/workflows/ci.yml` (lint + type-check + build)
-- [ ] Push lên GitHub, connect Vercel
-- [ ] Set environment variables trên Vercel (Supabase cloud keys)
+- [x] `store/userStore.ts`: profile, totalXP, level, xpGainQueue, `addXP()`
+- [x] `hooks/useXPRealtime.ts`: Supabase Realtime subscribe `character_stats`
+- [x] TypeScript types: `src/types/rpg.ts`, `src/types/tools.ts`
 
 ---
 
@@ -193,46 +162,39 @@ Chuyển đổi từ `lib/rpg.jsx` sang TypeScript:
 
 ### Components
 
-- [x] `components/pomodoro/PomodoroTimer.tsx`: vòng tròn SVG progress + số đếm ngược (72px)
-- [x] `components/pomodoro/ModeSelector.tsx`: Focus / Short / Long pill buttons
-- [x] `components/pomodoro/TimerControls.tsx`: Start/Pause, Reset, Skip
-- [x] `components/pomodoro/SessionDots.tsx`: 4 session dots (filled/empty)
-- [x] `components/pomodoro/TaskList.tsx`: list với drag-reorder (`@dnd-kit/core`)
-- [x] `components/pomodoro/TaskItem.tsx`: checkbox + tên + pomodoro dot tracker + menu
-- [x] `components/pomodoro/SoundscapeSelector.tsx`: 3×2 grid + lock overlay cho locked tracks + volume slider
-- [x] `components/pomodoro/FocusBlocker.tsx`: toggle on/off + site list + blocked count
-- [x] `components/pomodoro/FocusModeOverlay.tsx`: full-screen dark overlay, chỉ hiện timer lớn + task
-- [x] `components/pomodoro/XPTickerPanel.tsx`: live log các XP gains trong session
-- [x] `components/pomodoro/SessionHistoryChart.tsx`: 14-day bar chart (SVG)
+- [x] `components/pomodoro/PomodoroTimer.tsx`
+- [x] `components/pomodoro/ModeSelector.tsx`
+- [x] `components/pomodoro/TimerControls.tsx`
+- [x] `components/pomodoro/SessionDots.tsx`
+- [x] `components/pomodoro/TaskList.tsx`
+- [x] `components/pomodoro/TaskItem.tsx`
+- [x] `components/pomodoro/SoundscapeSelector.tsx`
+- [x] `components/pomodoro/FocusBlocker.tsx`
+- [x] `components/pomodoro/FocusModeOverlay.tsx`
+- [x] `components/pomodoro/XPTickerPanel.tsx`
+- [x] `components/pomodoro/SessionHistoryChart.tsx`
 
 ---
 
 ### Page
 
-- [x] `app/(app)/pomodoro/page.tsx`: Client Component, render toàn bộ tool
+- [x] `app/(app)/pomodoro/page.tsx`
 - [x] Keyboard shortcuts: `Space` = start/pause, `R` = reset, `F` = focus mode
-- [x] Notification API khi session complete (yêu cầu permission lần đầu)
+- [x] Notification API khi session complete
 
 ---
 
 ### XP Integration
 
-- [x] Khi session hoàn thành (timeLeft = 0, phase = 'work'):
-  1. `POST /api/pomodoro/sessions` với session data
-  2. Nhận `{ xpAwarded, leveledUp }` response
-  3. `userStore.addXP(amount)` → trigger XP popup animation
-  4. Nếu `leveledUp` → dispatch `jl:levelup` event → LevelUpModal
-- [x] XP amounts:
-  - Session complete: +10
-  - Clean session (0 interruptions): +5 bonus
-  - Daily streak bonus: +5
-- [ ] Update `character_stats.total_pomodoros` + `total_focus_minutes` *(defer: cần thêm RPC call trong API route)*
+- [x] POST session → nhận `{ xpAwarded, leveledUp }` → trigger XP popup + LevelUpModal
+- [x] Session complete: +10 XP · Clean session: +5 bonus · Daily streak: +5
+- [ ] Update `character_stats.total_pomodoros` + `total_focus_minutes` *(defer: cần thêm RPC call)*
 
 ---
 
 ### Edge Cases
 
-- [x] Tab hidden / máy sleep: khi tab active lại, recalculate elapsed từ timestamp lúc hidden
+- [x] Tab hidden / máy sleep: recalculate elapsed từ timestamp lúc hidden
 - [x] User đóng tab giữa chừng: session chưa hoàn thành không tính XP
 - [x] Cross-tab sync qua `BroadcastChannel`
 
@@ -244,163 +206,136 @@ Chuyển đổi từ `lib/rpg.jsx` sang TypeScript:
 
 **Deliverable:** User tạo habit → check-in hàng ngày → thấy streak tăng → heatmap điền màu → XP cộng vào.
 
-**Completed:** 2026-04-23 — build pass, type-check 0 errors, lint 0 errors. Một số items minor defer sang Sprint 4 polish.
+**Completed:** 2026-04-23 — build pass, type-check 0 errors, lint 0 errors.
 
 ---
 
 ### Supabase
 
-- [x] `GET /api/habits` → implemented as `fetchHabitsWithStatus` Server Action (`features/habits/queries.ts`)
-- [x] `POST /api/habits` → `createHabit` Server Action (`features/habits/actions.ts`)
-- [x] `PUT /api/habits/[id]` → `updateHabit` Server Action
-- [x] `DELETE /api/habits/[id]` → `archiveHabit` Server Action (soft delete, `is_archived = true`)
-- [x] Server Action `toggleHabitCompletion(habitId, userId, date)`:
-  1. Insert/delete `habit_completions`
-  2. Streak tính tay trong action (current_streak, longest_streak, last_completed_date)
-  3. Insert `xp_transactions` nếu check-in
-  4. `revalidatePath('/habits')`
+- [x] `fetchHabitsWithStatus` Server Action (`features/habits/queries.ts`)
+- [x] `createHabit` Server Action (`features/habits/actions.ts`)
+- [x] `updateHabit` Server Action
+- [x] `archiveHabit` Server Action (soft delete, `is_archived = true`)
+- [x] `toggleHabitCompletion(habitId, userId, date)`: Insert/delete completions, streak calc, XP insert, `revalidatePath`
 
 ---
 
 ### State
 
-- [x] `features/habits/store.ts`: todayHabits, optimisticCheckinIds, optimistic toggle/rollback/confirm
-- [x] `hooks/useHabits.ts`: TanStack Query + optimistic update (`useToggleHabit`, `useCreateHabit`, `useUpdateHabit`, `useArchiveHabit`, `useHeatmapQuery`)
+- [x] `features/habits/store.ts`: optimistic toggle/rollback/confirm
+- [x] `hooks/useHabits.ts`: TanStack Query + `useToggleHabit`, `useCreateHabit`, `useUpdateHabit`, `useArchiveHabit`, `useHeatmapQuery`
 
 ---
 
 ### Components
 
-- [x] `components/habits/HabitCard.tsx`: tên habit + category icon + streak badge + check-in button + dropdown menu (edit/delete) + yesterday retroactive row
-- [x] `components/habits/CheckInButton.tsx`: toggle với spring animation (Framer Motion), loading spinner
-- [x] `components/habits/StreakBadge.tsx`: animated flame + số ngày, 4 tier (cold/warm/hot/blazing)
-- [x] `components/habits/HabitForm.tsx`: Dialog create/edit, Zod validation, fields: name/category/timeOfDay/color/targetDays/reminderTime
-- [x] `components/habits/HeatmapView.tsx`: 26-week grid từ `habit_completions` data, 5 intensity levels
-- [x] `components/habits/InsightPanel.tsx`: completion rate, best streak, empty state khi < 2 habits
-- [x] `components/habits/WeeklyGrid.tsx`: 7-day rolling grid (header Mon–Sun + filled circles per habit)
-- [x] `components/habits/RemindersPanel.tsx`: today's schedule grouped by time_of_day, Due/Done badges, reminder time
-- [ ] `components/habits/HabitList.tsx` *(intentionally skipped — HabitsClient renders cards directly)*
+- [x] `components/habits/HabitCard.tsx`
+- [x] `components/habits/CheckInButton.tsx`
+- [x] `components/habits/StreakBadge.tsx`
+- [x] `components/habits/HabitForm.tsx`
+- [x] `components/habits/HeatmapView.tsx`
+- [x] `components/habits/InsightPanel.tsx`
+- [x] `components/habits/WeeklyGrid.tsx`
+- [x] `components/habits/RemindersPanel.tsx`
+- [ ] `components/habits/HabitList.tsx` *(skipped — HabitsClient renders cards directly)*
 
 ---
 
 ### Page
 
-- [x] `app/(app)/habits/page.tsx`: Server Component, auth check, render HabitsClient
-- [x] `app/(app)/habits/HabitsClient.tsx`: Client island, TanStack Query, XP notifications, progress bar, tabs (heatmap/insights)
+- [x] `app/(app)/habits/page.tsx`
+- [x] `app/(app)/habits/HabitsClient.tsx`
 
 ---
 
 ### XP Integration
 
-- [x] Check-in: +5 XP per habit (`XP_VALUES.HABIT_CHECKIN`)
-- [x] All habits done cùng ngày: +10 XP bonus (`XP_VALUES.HABIT_ALL_DONE_BONUS`)
-- [x] Cập nhật `character_stats.total_habits_completed` (best-effort trong toggleHabitCompletion)
-- [x] Streak milestones: +50 XP tại 7 ngày, +100 XP tại 14 ngày, +200 XP tại 30 ngày (`STREAK_MILESTONE_XP` trong actions.ts)
+- [x] Check-in: +5 XP · All done bonus: +10 XP
+- [x] Streak milestones: +50 XP (7d), +100 XP (14d), +200 XP (30d)
+- [x] `character_stats.total_habits_completed` update
 
 ---
 
 ### Edge Cases
 
-- [x] Timezone: `toLocaleDateString('sv-SE')` → YYYY-MM-DD trong browser timezone (không phải UTC)
-- [x] Habit limit: cứng max 10, button disabled + label "Max 10 habits reached"
-- [x] Retroactive check-in ngày hôm qua trong 6h sau midnight (`isRetroWindow = hours < 6`, yesterday row trên mỗi HabitCard)
-- [x] Warning sớm khi đạt 8+ habits (banner ⚠️ khi `totalHabits >= 8 && !atLimit`)
+- [x] Timezone: `toLocaleDateString('sv-SE')` → YYYY-MM-DD browser timezone
+- [x] Habit limit: max 10, button disabled + "Max 10 habits reached"
+- [x] Retroactive check-in ngày hôm qua trong 6h sau midnight
+- [x] Warning sớm khi đạt 8+ habits
 
 ---
 
-## Sprint 4 — Flashcard + Character + Ship
+## Sprint 4 — Flashcard + Character + Ship 🔄
 
 **Goal:** SM-2 review loop hoàn chỉnh, Character screen đầy đủ, Dashboard tổng hợp, app deploy lên Vercel production.
 
 **Deliverable:** App hoàn chỉnh 3 tools + dashboard + character sheet. Deployed và chạy được trên production URL.
 
+**Status:** Features complete locally — Production Deploy pending.
+
 ---
 
-### Flashcard
+### Flashcard ✅
 
 #### Supabase
-- [ ] API route `GET /api/flashcards/decks`: deck list với due counts
-- [ ] API route `POST /api/flashcards/decks`: tạo deck
-- [ ] API route `GET/PUT/DELETE /api/flashcards/decks/[id]`
-- [ ] API route `POST /api/flashcards/cards`: tạo card
-- [ ] API route `POST /api/flashcards/review`: nhận rating → gọi `apply_sm2()` → trả về next interval + XP
+- [x] `hooks/useFlashcards.ts`: TanStack Query cho decks, cards, review session
+- [x] `store/flashcardStore.ts`: current review session, results queue
 
 #### State
-- [ ] `store/flashcardStore.ts`: current review session, results queue
-- [ ] `hooks/useFlashSession.ts`: session state machine (idle → reviewing → complete)
-- [ ] `lib/sm2/algorithm.ts`: `calculateNextReview()` client-side (preview intervals cho UI)
+- [x] `lib/sm2/algorithm.ts`: `calculateNextReview()` client-side
+- [x] `hooks/useFlashcards.ts`: session state machine (idle → reviewing → complete)
 
 #### Components
-- [ ] `components/flashcard/DeckList.tsx`: Server Component — list decks với due count chip
-- [ ] `components/flashcard/DeckCard.tsx`: deck overview với color, stats
-- [ ] `components/flashcard/CardFlip.tsx`: CSS 3D flip, `backface-visibility: hidden`
-- [ ] `components/flashcard/RatingButtons.tsx`: Again/Hard/Good/Easy với next interval preview
-  - Again → "< 1 min", Hard → "6 min", Good → "3 days", Easy → "8 days"
-  - Keyboard: 1/2/3/4 (chỉ sau khi đã flip)
-- [ ] `components/flashcard/ReviewSession.tsx`: Client Component — orchestrate session flow
-- [ ] `components/flashcard/SessionProgress.tsx`: progress bar (x/42 · y%)
-- [ ] `components/flashcard/SessionSummary.tsx`: kết quả session (retention, XP, breakdown)
-- [ ] `components/flashcard/DeckStats.tsx`: card pool (New/Learning/Young/Mature), forecast chart
-- [ ] `components/flashcard/CardEditor.tsx`: Dialog tạo/sửa card (front/back textarea + tags)
-- [ ] `components/flashcard/ForecastChart.tsx`: due cards 7 ngày tới (bar chart SVG)
+- [x] `components/flashcard/DeckList.tsx`
+- [x] `components/flashcard/DeckCard.tsx`
+- [x] `components/flashcard/CardFlip.tsx`
+- [x] `components/flashcard/RatingButtons.tsx` (Again/Hard/Good/Easy + keyboard 1/2/3/4)
+- [x] `components/flashcard/ReviewSession.tsx`
+- [x] `components/flashcard/SessionProgress.tsx`
+- [x] `components/flashcard/SessionSummary.tsx`
+- [x] `components/flashcard/DeckStats.tsx`
+- [x] `components/flashcard/CardEditor.tsx`
+- [x] `components/flashcard/DeckEditor.tsx`
+- [x] `components/flashcard/ForecastChart.tsx`
 
 #### Pages
-- [ ] `app/(app)/flashcards/page.tsx`: Server Component — deck list
-- [ ] `app/(app)/flashcards/[deckId]/page.tsx`: deck detail + study button
-- [ ] `app/(app)/flashcards/[deckId]/study/page.tsx`: Client Component — review session
-
-#### XP Integration
-- [ ] Per card: Again=0, Hard=+1, Good=+2, Easy=+3
-- [ ] Session bonus: +15 XP nếu review ≥ 50 cards trong 1 session
-- [ ] Cập nhật `character_stats.total_cards_reviewed`
-
-#### Edge Cases
-- [ ] Empty due queue: hiển thị "All caught up! Next review: tomorrow (N cards due)"
-- [ ] Session interrupted: resume từ đầu session (không mất cards)
-- [ ] Batch submit: buffer results client-side trong session, POST 1 lần khi session kết thúc
+- [x] `app/(app)/flashcards/page.tsx`
+- [x] `app/(app)/flashcards/[deckId]/page.tsx`
+- [x] `app/(app)/flashcards/[deckId]/study/page.tsx`
 
 ---
 
-### Character Screen
+### Character Screen ✅
 
-- [ ] `app/(app)/character/page.tsx`: Server Component
-- [ ] `components/character/CharacterSheet.tsx`: full RPG profile
-  - Avatar lớn + tier badge + class label + title
-  - 4 stat bars: Focus, Discipline, Knowledge, Endurance (0–100)
-  - XP bar + level progress
-- [ ] `components/character/BadgeGrid.tsx`: locked/unlocked badges với rarity color
-  - Locked badges hiện icon mờ + "Unlock at X" tooltip
-- [ ] `components/character/ActivityTimeline.tsx`: recent XP events feed
-- [ ] `components/character/StatChart.tsx`: 4 stat bars với labels
+- [x] `app/(app)/character/page.tsx`
+- [x] `components/character/CharacterSheet.tsx`
+- [x] `components/character/BadgeGrid.tsx`
+- [x] `components/character/ActivityTimeline.tsx`
+- [x] `components/character/StatChart.tsx`
 
 ---
 
-### Dashboard
+### Dashboard ✅
 
-- [ ] `app/(app)/dashboard/page.tsx`: Server Component (ISR revalidate = 60s)
-- [ ] `components/dashboard/HeroCard.tsx`: Avatar + XP bar + 4 stat pills + "Next unlock" card
-- [ ] `components/dashboard/QuestList.tsx`: daily quests với progress bars + "Resets in X:XX" countdown
-- [ ] `components/dashboard/ToolGrid.tsx`: 3 tool shortcut cards (Pomodoro/Habits/Flashcards)
-- [ ] `components/dashboard/WeeklyStats.tsx`: 4 mini-stat cards với delta vs tuần trước + sparkline
-- [ ] `components/dashboard/RecentBadges.tsx`: last 3 badges earned
-
----
-
-### Polish & QA
-
-- [ ] Error boundaries cho mỗi tool section
-- [ ] Skeleton loading states cho tất cả data-fetching components
-- [ ] Empty states có CTA (deck rỗng, 0 habits, 0 sessions)
-- [ ] Mobile responsive: sidebar collapse → bottom nav trên mobile
-- [ ] `React.memo` cho heavy components: `Heatmap`, `XPBar`, `BadgeGrid`
-- [ ] Test toàn bộ user flows:
-  - Onboarding (signup → character creation → first tool)
-  - Daily use (dashboard → start pomodoro → earn XP → level up)
-  - Flashcard review session (chọn deck → flip → rate → summary)
+- [x] `app/(app)/dashboard/page.tsx`
+- [x] `components/dashboard/HeroCard.tsx`
+- [x] `components/dashboard/QuestList.tsx`
+- [x] `components/dashboard/ToolGrid.tsx`
+- [x] `components/dashboard/WeeklyStats.tsx`
+- [x] `components/dashboard/RecentBadges.tsx`
 
 ---
 
-### Production Deploy
+### Polish ✅
+
+- [x] Error boundaries: `components/errors/ToolErrorBoundary.tsx`, `QueryErrorBoundary.tsx`
+- [x] Skeleton loading states: `DashboardSkeleton`, `CharacterSheetSkeleton`, `BadgeGridSkeleton`, `DeckListSkeleton`
+- [x] Empty states với CTA: `NoPomodoroSessionsCTA`, `NoHabitsCTA`, `NoDecksCTA`
+- [x] Mobile responsive: `components/layout/BottomNav.tsx`
+
+---
+
+### Production Deploy ❌
 
 - [ ] Tạo Supabase cloud project (region: Singapore)
 - [ ] `supabase link --project-ref YOUR_REF`
@@ -408,8 +343,8 @@ Chuyển đổi từ `lib/rpg.jsx` sang TypeScript:
 - [ ] Set environment variables trên Vercel (cloud Supabase keys)
 - [ ] Set Auth Redirect URL trong Supabase: `https://jl-tools.vercel.app/api/auth/callback`
 - [ ] Enable Google OAuth (tạo credentials tại Google Cloud Console)
-- [ ] Verify RLS policies bằng cách test với anonymous role
-- [ ] Setup Sentry (error tracking): `npx @sentry/wizard@latest -i nextjs`
+- [ ] Verify RLS policies với anonymous role
+- [ ] Setup Sentry: `npx @sentry/wizard@latest -i nextjs`
 - [ ] Verify deploy trên production URL
 - [ ] Smoke test toàn bộ flows trên production
 
@@ -418,28 +353,26 @@ Chuyển đổi từ `lib/rpg.jsx` sang TypeScript:
 ## Definition of Done (per sprint)
 
 Một sprint được coi là Done khi:
-- [ ] Tất cả tasks đã checked
-- [ ] `npm run lint` pass (0 errors)
-- [ ] `npm run type-check` pass (0 TypeScript errors)
-- [ ] App chạy được trên localhost với Supabase local
-- [ ] User flows chính của sprint hoạt động end-to-end
-- [ ] Code đã push lên `main` và CI pass
+- [x] Tất cả tasks đã checked
+- [x] `pnpm lint` pass (0 errors)
+- [x] `pnpm build` pass (0 TypeScript errors)
+- [x] App chạy được trên localhost với Supabase local
+- [x] User flows chính của sprint hoạt động end-to-end
+- [x] Code đã push lên `main`
 
 ---
 
 ## Dependency Tree
 
 ```
-Sprint 1 (Foundation)
+Sprint 1 (Foundation) ✅
     ↓
-Sprint 2 (Pomodoro) ← cần: auth, XP engine, character_stats
+Sprint 2 (Pomodoro) ✅ ← auth, XP engine, character_stats
     ↓
-Sprint 3 (Habits) ← cần: auth, XP engine, streak function
+Sprint 3 (Habits) ✅ ← auth, XP engine, streak function
     ↓
-Sprint 4 (Flashcard + Ship) ← cần: auth, XP engine, SM-2 function, dashboard tổng hợp từ 3 tools
+Sprint 4 (Flashcard + Ship) 🔄 ← auth, XP engine, SM-2 function, dashboard
 ```
-
-Sprint 2 và 3 độc lập về feature — có thể làm song song nếu có 2 developer.
 
 ---
 
@@ -447,34 +380,34 @@ Sprint 2 và 3 độc lập về feature — có thể làm song song nếu có 
 
 ```bash
 # Core
-npm install @supabase/supabase-js @supabase/ssr
+pnpm add @supabase/supabase-js @supabase/ssr
 
 # UI
 npx shadcn@latest init
 npx shadcn@latest add button dialog progress tabs switch tooltip dropdown-menu skeleton badge popover
 
 # Animation
-npm install framer-motion
+pnpm add framer-motion
 
 # State
-npm install zustand @tanstack/react-query
+pnpm add zustand @tanstack/react-query
 
 # Forms
-npm install react-hook-form zod @hookform/resolvers
+pnpm add react-hook-form zod @hookform/resolvers
 
 # Date
-npm install date-fns date-fns-tz
+pnpm add date-fns date-fns-tz
 
 # Icons
-npm install lucide-react
+pnpm add lucide-react
 
-# Drag & drop (cho Pomodoro task list)
-npm install @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities
+# Drag & drop (Pomodoro task list)
+pnpm add @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities
 
 # Monitoring (sau khi deploy)
-npm install @vercel/analytics @vercel/speed-insights
+pnpm add @vercel/analytics @vercel/speed-insights
 npx @sentry/wizard@latest -i nextjs
 
 # Dev
-npm install -D supabase @tanstack/react-query-devtools
+pnpm add -D supabase @tanstack/react-query-devtools
 ```

@@ -1,12 +1,14 @@
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, getUser } from '@/lib/supabase/server'
 import { SideNav } from '@/components/layout/SideNav'
+import { BottomNav } from '@/components/layout/BottomNav'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getUser()
 
   if (!user) redirect('/login')
+
+  const supabase = await createClient()
 
   const [statsRes, profileRes] = await Promise.all([
     supabase.from('character_stats').select('level, total_xp, xp_in_current_level').eq('user_id', user.id).single(),
@@ -23,8 +25,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const xpInLevel = stats?.xp_in_current_level ?? 0
 
   const thresholdRes = await supabase.from('level_thresholds').select('xp_required').eq('level', level + 1).single()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const nextThreshold = thresholdRes.data as any as { xp_required: number } | null
+  const nextThreshold = thresholdRes.data as { xp_required: number } | null
 
   const maxXP = nextThreshold?.xp_required
     ? nextThreshold.xp_required - (totalXP - xpInLevel)
@@ -32,15 +33,18 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="flex h-screen overflow-hidden">
-      <SideNav
-        level={level}
-        currentXP={xpInLevel}
-        maxXP={maxXP}
-        characterName={profile?.character_name ?? 'Adventurer'}
-      />
-      <main className="flex-1 flex flex-col overflow-hidden">
+      <div className="hidden md:flex">
+        <SideNav
+          level={level}
+          currentXP={xpInLevel}
+          maxXP={maxXP}
+          characterName={profile?.character_name ?? 'Adventurer'}
+        />
+      </div>
+      <main className="flex-1 flex flex-col overflow-hidden pb-16 md:pb-0">
         {children}
       </main>
+      <BottomNav />
     </div>
   )
 }

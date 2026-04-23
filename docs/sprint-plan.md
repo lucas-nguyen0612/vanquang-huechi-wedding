@@ -271,15 +271,15 @@ Chuyển đổi từ `lib/rpg.jsx` sang TypeScript:
 
 ### Components
 
-- [x] `components/habits/HabitCard.tsx`: tên habit + category icon + streak badge + check-in button + dropdown menu (edit/delete)
+- [x] `components/habits/HabitCard.tsx`: tên habit + category icon + streak badge + check-in button + dropdown menu (edit/delete) + yesterday retroactive row
 - [x] `components/habits/CheckInButton.tsx`: toggle với spring animation (Framer Motion), loading spinner
 - [x] `components/habits/StreakBadge.tsx`: animated flame + số ngày, 4 tier (cold/warm/hot/blazing)
 - [x] `components/habits/HabitForm.tsx`: Dialog create/edit, Zod validation, fields: name/category/timeOfDay/color/targetDays/reminderTime
 - [x] `components/habits/HeatmapView.tsx`: 26-week grid từ `habit_completions` data, 5 intensity levels
 - [x] `components/habits/InsightPanel.tsx`: completion rate, best streak, empty state khi < 2 habits
-- [ ] `components/habits/HabitList.tsx` *(defer — HabitsClient render card list trực tiếp, không tách file riêng)*
-- [ ] `components/habits/WeeklyGrid.tsx` *(defer — không implement weekly 7-col grid, dùng card list)*
-- [ ] `components/habits/RemindersPanel.tsx` *(defer — chưa implement)*
+- [x] `components/habits/WeeklyGrid.tsx`: 7-day rolling grid (header Mon–Sun + filled circles per habit)
+- [x] `components/habits/RemindersPanel.tsx`: today's schedule grouped by time_of_day, Due/Done badges, reminder time
+- [ ] `components/habits/HabitList.tsx` *(intentionally skipped — HabitsClient renders cards directly)*
 
 ---
 
@@ -295,7 +295,7 @@ Chuyển đổi từ `lib/rpg.jsx` sang TypeScript:
 - [x] Check-in: +5 XP per habit (`XP_VALUES.HABIT_CHECKIN`)
 - [x] All habits done cùng ngày: +10 XP bonus (`XP_VALUES.HABIT_ALL_DONE_BONUS`)
 - [x] Cập nhật `character_stats.total_habits_completed` (best-effort trong toggleHabitCompletion)
-- [ ] Streak milestones: +50 XP tại 7 ngày, +100 XP tại 14 ngày, +200 XP tại 30 ngày *(defer — chưa implement)*
+- [x] Streak milestones: +50 XP tại 7 ngày, +100 XP tại 14 ngày, +200 XP tại 30 ngày (`STREAK_MILESTONE_XP` trong actions.ts)
 
 ---
 
@@ -303,8 +303,8 @@ Chuyển đổi từ `lib/rpg.jsx` sang TypeScript:
 
 - [x] Timezone: `toLocaleDateString('sv-SE')` → YYYY-MM-DD trong browser timezone (không phải UTC)
 - [x] Habit limit: cứng max 10, button disabled + label "Max 10 habits reached"
-- [ ] Retroactive check-in ngày hôm qua trong 6h sau midnight *(defer — chưa implement UI)*
-- [ ] Warning sớm khi đạt 8+ habits *(defer — hiện chỉ block cứng tại 10)*
+- [x] Retroactive check-in ngày hôm qua trong 6h sau midnight (`isRetroWindow = hours < 6`, yesterday row trên mỗi HabitCard)
+- [x] Warning sớm khi đạt 8+ habits (banner ⚠️ khi `totalHabits >= 8 && !atLimit`)
 
 ---
 

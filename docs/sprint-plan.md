@@ -91,6 +91,20 @@ Sprint 4 (W7–8)   Flashcard + Ship  → SM-2 review, Character screen, Dashboa
 
 ---
 
+### Landing Page
+
+- [ ] Cập nhật `app/page.tsx`: hiển thị landing page cho unauthenticated, redirect `/dashboard` cho logged-in
+- [ ] `app/(marketing)/layout.tsx`: layout riêng cho public pages (không có SideNav)
+- [ ] `components/marketing/LandingNav.tsx`: sticky nav với logo, links, lang switcher, Sign in + Start free buttons
+- [ ] `components/marketing/HeroSection.tsx`: headline, description, CTA buttons, social proof stats (24k+ adventurers...)
+- [ ] `components/marketing/HeroVisual.tsx`: 3 stacked product cards (heatmap, pomodoro timer, level-up toast) — dùng lại RPG components
+- [ ] `components/marketing/ToolStrip.tsx`: 3-col grid giới thiệu Pomodoro / Habit Tracker / Flashcards
+- [ ] `components/marketing/XPBand.tsx`: "Every tool feeds the same XP bar" section với XP flow diagram
+- [ ] `components/marketing/LandingFooter.tsx`: copyright + links + version tag
+- [ ] Wire `Sign in` → `/login`, `Start free` → `/signup`, `Begin your adventure` → `/signup`
+
+---
+
 ### Authentication
 
 - [ ] Page `/login`: email + password form + Google OAuth button
@@ -224,77 +238,73 @@ Chuyển đổi từ `lib/rpg.jsx` sang TypeScript:
 
 ---
 
-## Sprint 3 — Habit Tracker
+## Sprint 3 — Habit Tracker ✅
 
 **Goal:** Habit check-in hoạt động, streak tính đúng (timezone-aware), heatmap render từ real Supabase data, XP award khi check-in.
 
 **Deliverable:** User tạo habit → check-in hàng ngày → thấy streak tăng → heatmap điền màu → XP cộng vào.
 
+**Completed:** 2026-04-23 — build pass, type-check 0 errors, lint 0 errors. Một số items minor defer sang Sprint 4 polish.
+
 ---
 
 ### Supabase
 
-- [ ] API route `GET /api/habits`: lấy danh sách habits + completions trong tuần
-- [ ] API route `POST /api/habits`: tạo habit mới
-- [ ] API route `PUT /api/habits/[id]`: update habit
-- [ ] API route `DELETE /api/habits/[id]`: archive habit (soft delete)
-- [ ] Server Action `toggleHabitCompletion(habitId, date)`:
+- [x] `GET /api/habits` → implemented as `fetchHabitsWithStatus` Server Action (`features/habits/queries.ts`)
+- [x] `POST /api/habits` → `createHabit` Server Action (`features/habits/actions.ts`)
+- [x] `PUT /api/habits/[id]` → `updateHabit` Server Action
+- [x] `DELETE /api/habits/[id]` → `archiveHabit` Server Action (soft delete, `is_archived = true`)
+- [x] Server Action `toggleHabitCompletion(habitId, userId, date)`:
   1. Insert/delete `habit_completions`
-  2. `update_streak()` function được trigger tự động
-  3. Gọi `award_xp()` nếu check-in
+  2. Streak tính tay trong action (current_streak, longest_streak, last_completed_date)
+  3. Insert `xp_transactions` nếu check-in
   4. `revalidatePath('/habits')`
 
 ---
 
 ### State
 
-- [ ] `store/habitStore.ts`: habits list, todayCheckIns map, optimistic toggle
-- [ ] `hooks/useHabits.ts`: TanStack Query + optimistic update khi toggle
+- [x] `features/habits/store.ts`: todayHabits, optimisticCheckinIds, optimistic toggle/rollback/confirm
+- [x] `hooks/useHabits.ts`: TanStack Query + optimistic update (`useToggleHabit`, `useCreateHabit`, `useUpdateHabit`, `useArchiveHabit`, `useHeatmapQuery`)
 
 ---
 
 ### Components
 
-- [ ] `components/habits/HabitList.tsx`: weekly grid view (7 cols × N rows)
-- [ ] `components/habits/HabitCard.tsx`: tên habit + category + thời gian
-- [ ] `components/habits/CheckInButton.tsx`: toggle với bounce animation (Framer Motion)
-- [ ] `components/habits/WeeklyGrid.tsx`: Mon–Sun header + date labels
-- [ ] `components/habits/StreakBadge.tsx`: animated flame + số ngày
-- [ ] `components/habits/HabitForm.tsx`: Dialog create/edit (shadcn Dialog)
-  - Fields: name, category, timeOfDay, color, targetDays, reminderTime
-  - Validation: Zod schema
-- [ ] `components/habits/HeatmapView.tsx`: 26-week grid từ `habit_completions` data
-  - 5 intensity levels (0–4 habits done/ngày)
-  - Tooltip: "Apr 23 · 5/6 habits done"
-- [ ] `components/habits/InsightPanel.tsx`:
-  - Completion rate by category
-  - Best streak per habit
-  - "Keep going! Insights unlock after 14 days" state
-- [ ] `components/habits/RemindersPanel.tsx`: today's schedule với Due/Done badges
+- [x] `components/habits/HabitCard.tsx`: tên habit + category icon + streak badge + check-in button + dropdown menu (edit/delete)
+- [x] `components/habits/CheckInButton.tsx`: toggle với spring animation (Framer Motion), loading spinner
+- [x] `components/habits/StreakBadge.tsx`: animated flame + số ngày, 4 tier (cold/warm/hot/blazing)
+- [x] `components/habits/HabitForm.tsx`: Dialog create/edit, Zod validation, fields: name/category/timeOfDay/color/targetDays/reminderTime
+- [x] `components/habits/HeatmapView.tsx`: 26-week grid từ `habit_completions` data, 5 intensity levels
+- [x] `components/habits/InsightPanel.tsx`: completion rate, best streak, empty state khi < 2 habits
+- [ ] `components/habits/HabitList.tsx` *(defer — HabitsClient render card list trực tiếp, không tách file riêng)*
+- [ ] `components/habits/WeeklyGrid.tsx` *(defer — không implement weekly 7-col grid, dùng card list)*
+- [ ] `components/habits/RemindersPanel.tsx` *(defer — chưa implement)*
 
 ---
 
 ### Page
 
-- [ ] `app/(app)/habits/page.tsx`: Server Component fetch habits → pass to client
-- [ ] `app/(app)/habits/HabitsClient.tsx`: Client island quản lý interactive state
+- [x] `app/(app)/habits/page.tsx`: Server Component, auth check, render HabitsClient
+- [x] `app/(app)/habits/HabitsClient.tsx`: Client island, TanStack Query, XP notifications, progress bar, tabs (heatmap/insights)
 
 ---
 
 ### XP Integration
 
-- [ ] Check-in: +5 XP per habit
-- [ ] All habits done (cùng ngày): +10 XP bonus
-- [ ] Streak milestones: +50 XP tại 7 ngày, +100 XP tại 14 ngày, +200 XP tại 30 ngày
-- [ ] Cập nhật `character_stats.total_habits_completed`
+- [x] Check-in: +5 XP per habit (`XP_VALUES.HABIT_CHECKIN`)
+- [x] All habits done cùng ngày: +10 XP bonus (`XP_VALUES.HABIT_ALL_DONE_BONUS`)
+- [x] Cập nhật `character_stats.total_habits_completed` (best-effort trong toggleHabitCompletion)
+- [ ] Streak milestones: +50 XP tại 7 ngày, +100 XP tại 14 ngày, +200 XP tại 30 ngày *(defer — chưa implement)*
 
 ---
 
 ### Edge Cases
 
-- [ ] Timezone: gửi `completed_date` là calendar date trong browser timezone, không phải UTC
-- [ ] Retroactive check-in: cho phép check ngày hôm qua trong vòng 6h sau midnight
-- [ ] Habit limit: max 10 habits, show warning khi đạt 8+
+- [x] Timezone: `toLocaleDateString('sv-SE')` → YYYY-MM-DD trong browser timezone (không phải UTC)
+- [x] Habit limit: cứng max 10, button disabled + label "Max 10 habits reached"
+- [ ] Retroactive check-in ngày hôm qua trong 6h sau midnight *(defer — chưa implement UI)*
+- [ ] Warning sớm khi đạt 8+ habits *(defer — hiện chỉ block cứng tại 10)*
 
 ---
 

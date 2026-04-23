@@ -55,7 +55,7 @@ export default function PomodoroPage() {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
       if (e.key === ' ') {
         e.preventDefault()
-        isRunning ? pauseTimer() : startTimer()
+        if (isRunning) { pauseTimer() } else { startTimer() }
       }
       if (e.key === 'r' || e.key === 'R') resetTimer()
       if (e.key === 'f' || e.key === 'F') setFocusMode(m => !m)

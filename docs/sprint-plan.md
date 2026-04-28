@@ -265,6 +265,16 @@ Sprint 4 (W7–8)   Flashcard + Ship  🔄 Features complete — Production Depl
 
 ---
 
+### Habit Check-in — Post-Impl Bugfix ✅
+
+Fix sau khi user báo "bấm hoàn thành habit không được" (2026-04-24):
+
+- [x] Migration `00011_fix_check_and_award_badges.sql`: thêm branch `when 'total_habits_completed'` và `else null` cho CASE trong function `check_and_award_badges`
+  - **Root cause:** Seed badge `first_habit` ở `00009_sprint4_full_schema.sql:592` dùng `condition_type='total_habits_completed'` nhưng function CASE trong cùng file (lines 350-371) không có branch tương ứng và không có `else` → Postgres ném `case not found` khi trigger `trg_habit_completion_streak` chạy `update_streak() → award_xp() → check_and_award_badges()` → rollback cả transaction → habit_completion không được lưu, UI revert về unchecked
+  - **Verified:** Test insert trực tiếp vào DB local sau fix → streak=1, +5 XP, badge `first_habit` được trao đúng
+
+---
+
 ## Sprint 4 — Flashcard + Character + Ship 🔄
 
 **Goal:** SM-2 review loop hoàn chỉnh, Character screen đầy đủ, Dashboard tổng hợp, app deploy lên Vercel production.
@@ -305,6 +315,73 @@ Sprint 4 (W7–8)   Flashcard + Ship  🔄 Features complete — Production Depl
 
 ---
 
+### Flashcard UI — Match Design ✅
+
+Implemented via 3-agent parallel team (2026-04-24). Build + typecheck pass.
+
+#### Layout & TopBar
+- [x] Redesign `app/(app)/flashcards/page.tsx`: 3-column grid `260px | 1fr | 320px` (split into server `page.tsx` + client `FlashcardsClient.tsx`; old `DeckListClient.tsx` deleted)
+- [x] TopBar: 3 action buttons bên phải — Browse (Search icon), New card (Plus icon, mở DeckEditor), Study all (Play icon, accent)
+- [x] TopBar subtitle: `"X cards due across Y decks · SM-2 scheduling · +2 XP per card"` từ `useAllDueCount()`
+
+#### Left Sidebar — `FlashcardSidebar.tsx`
+- [x] `components/flashcard/FlashcardSidebar.tsx`: compact sidebar (260px), header "DECKS", color dot + name + due chip theo deck color hoặc `✓ All caught up`, active state với accent-soft bg, "New deck" button
+- [x] Click deck → `onSelectDeck` callback, không navigate
+
+#### Center — Inline Study Zone
+- [x] Auto-select deck có `due_count` cao nhất on mount
+- [x] `useDueCards(selectedDeckId)` → `startSession()` inline, render `<ReviewSession />`
+- [x] Empty states: "All caught up on this deck" / "Select a deck to start studying" / "Create your first deck"
+
+#### Right Rail — `FlashcardStatsRail.tsx`
+- [x] `components/flashcard/FlashcardStatsRail.tsx`
+- [x] **Retention widget**: young/mature % từ `useRetentionStats(deckId)` + 7-point Sparkline
+- [x] **Card pool**: reuse `<DeckStats>` component
+- [x] **Forecast**: reuse `<ForecastChart>` component
+
+#### CardFlip Enhancements
+- [x] `CardFlip.tsx`: props `deckName?: string` (hiện sau accent dot ở header) và `tags?: string[]` (chip pills ở footer front face)
+- [x] Space key listener (guard input/textarea/contenteditable) + hint "Press Space to flip"
+- [x] `ReviewSession.tsx`: truyền `deckName` (từ `useDecks`) và `tags` (từ `currentCard.tags`) vào CardFlip
+
+#### Data / Queries
+- [x] `features/flashcards/actions.ts`: `fetchRetentionStats(deckId)` query `flashcard_reviews` tính young (<21d) / mature (≥21d) retention % + 7-day sparkline (carry-forward empty days)
+- [x] `features/flashcards/actions.ts`: `fetchAllDueCount()` sum due_count + count decks with due > 0
+- [x] `hooks/useFlashcards.ts`: `useRetentionStats(deckId)` (60s staleTime, enabled on deckId) và `useAllDueCount()` (30s staleTime)
+
+---
+
+### Flashcard UI — Post-Impl Polish & Bugfixes ✅
+
+Các fix sau khi user test 3-agent output (2026-04-24):
+
+#### CSS Token System Alignment
+- [x] `globals.css`: port toàn bộ utility classes từ `claude-design/styles/tokens.css` — `.jl-card`, `.jl-chip`, `.jl-btn` + `:hover`/`:active`, `.jl-btn-primary`, `.jl-btn-accent`, `.jl-display`, `.jl-mono`, `.jl-tnum`, `.jl-scroll::-webkit-*`
+  - **Root cause:** Design file JSX dùng `className="jl-btn"` etc. nhưng các class này chưa tồn tại → buttons không có flex layout, icons xếp dọc
+- [x] `globals.css`: CSS var aliases `--jl-bg-elevated → --jl-bg-raised` và `--jl-border → --jl-line`
+  - **Root cause:** Các legacy components (`DeckStats`, `ForecastChart`, `CardFlip`, `RatingButtons`, `SessionSummary`, Habits components) dùng tên biến không tồn tại → cards không có bg/border → không nổi bật
+- [x] `globals.css`: fix `.jl-btn-accent:hover` và `.jl-btn-primary:hover` — thêm `background` để override `.jl-btn:hover` (specificity cùng level, source order không đủ)
+- [x] `globals.css`: thêm `font-feature-settings: "ss01", "cv11"` vào body — enable alt glyphs của Geist (match typography design)
+
+#### Behavior Fixes
+- [x] `FlashcardsClient.tsx`: wire button "New card" vào `<CardEditor>` (trước đó mở nhầm `<DeckEditor>`) + disabled khi chưa chọn deck
+- [x] `store/flashcardStore.ts`: `flipCard()` toggle `!state.isFlipped` (trước đó set cứng `true` → không flip ngược back→front được)
+- [x] `CardFlip.tsx`: bỏ `if (isFlipped) return` trong Space handler → Space cũng toggle 2 chiều
+
+#### Study All & Retention Label Fixes (2026-04-24)
+- [x] `features/flashcards/actions.ts`: thêm server action `fetchAllDueCards()` — lấy toàn bộ due cards của user qua mọi deck (filter `user_id` + `due_at <= now`, order `due_at asc`)
+- [x] `FlashcardsClient.tsx`: wire `onClick` cho button "Study all" — trước đó button không có handler nên click không làm gì
+  - `handleStudyAll()` gọi `fetchAllDueCards()` với loading state, sau đó `resetSession()` + `startSession(ALL_DECKS_SENTINEL, cards)`
+  - Button `disabled` khi `totalDue === 0` hoặc đang loading, tooltip động `"Study N due cards across all decks"`
+  - Label hiển thị "Loading…" trong lúc fetch
+- [x] `FlashcardsClient.tsx`: đổi render condition center column `deckSelectedWithCards` → `sessionActive` (dựa trên `phase !== 'idle'`) → `<ReviewSession />` vẫn render đúng khi phiên cross-deck đang chạy dù `selectedDeckId` không đổi
+- [x] `FlashcardsClient.tsx`: auto-start effect thêm guard `currentDeckId === ALL_DECKS_SENTINEL` để không đè phiên Study All bằng phiên deck đơn lẻ
+- [x] `FlashcardsClient.tsx`: `handleSelectDeck` reset session kể cả khi click cùng deck nếu đang trong phiên cross-deck
+- [x] `components/flashcard/FlashcardStatsRail.tsx`: sửa label retention `young · 14 days` → `young · <21 days` cho khớp logic bucket `interval_after < 21` trong `fetchRetentionStats` (`actions.ts:485`)
+  - **Root cause:** design file viết "14 days" nhưng logic SM-2 theo Anki convention (young = interval < 21d) → label misleading
+
+---
+
 ### Character Screen ✅
 
 - [x] `app/(app)/character/page.tsx`
@@ -323,6 +400,38 @@ Sprint 4 (W7–8)   Flashcard + Ship  🔄 Features complete — Production Depl
 - [x] `components/dashboard/ToolGrid.tsx`
 - [x] `components/dashboard/WeeklyStats.tsx`
 - [x] `components/dashboard/RecentBadges.tsx`
+
+---
+
+### Dashboard UI — Match Design 🔄
+
+Parallel 2-agent team (2026-04-24) để đóng gap giữa design `claude-design/screens/dashboard.jsx` và implementation hiện tại.
+
+#### Data layer — `features/gamification/dashboard-queries.ts`
+- [ ] `dailyActivity[]` — aggregate 18 tuần × 7 ngày từ `pomodoro_sessions` + `habit_completions` + `flashcard_reviews` cho Heatmap
+- [ ] `weeklyXP` — sum `xp_transactions` tuần này/tuần trước + daily sparkline 7 điểm
+- [ ] `unearnedBadges` — query `badges` NOT IN user_badges để fill locked slots (limit 5)
+- [ ] `cardsReviewedToday` — count `flashcard_reviews` trong ngày hiện tại
+- [ ] `UNLOCK_SCHEDULE` constant + `getNextUnlock(level)` helper (level → reward name)
+
+#### Components
+- [ ] `components/dashboard/StreakCard.tsx`: Flame icon + current streak number + "longest X" + Heatmap (18w) + legend "less ... more"
+- [ ] Update `RecentBadges.tsx`: grid 4×2 = 8 slots, merge earned + locked, show Lock icon trên locked
+- [ ] Update `WeeklyStats.tsx`: layout 4 cột × 1 hàng, thêm stat "XP earned" với delta %
+- [ ] Update `HeroCard.tsx`: 4 stat pills dùng giá trị **today** (Streak, Focus today, Habits today X/Y, Cards today); nhận `nextUnlock` prop
+- [ ] Update `ToolGrid.tsx`: header thêm counter "3 active" bên phải
+
+#### Page integration — `app/(app)/dashboard/page.tsx`
+- [ ] Dynamic TopBar title theo giờ: "Good morning/afternoon/evening, {name}"
+- [ ] Dynamic subtitle: "You're {N} XP away from Level {L}. {K} quests remaining today."
+- [ ] TopBar `rightSlot`: Search (ghost) · Bell (ghost) · Start focus (accent, link `/pomodoro`)
+- [ ] Wire `StreakCard` + expanded `RecentBadges` vào right rail
+- [ ] Pass `nextUnlock`, today values tới `HeroCard`; pass `weeklyXP` tới `WeeklyStats`
+
+#### Deferred (không thuộc scope polish này)
+- [ ] Quest `is_bonus` flag + badge rewards (cần schema migration)
+- [ ] Per-tool level badge (Lv XX trên ToolCard) — cần schema per-tool XP
+- [ ] Guild · Leaderboard — feature lớn, tách sprint riêng
 
 ---
 

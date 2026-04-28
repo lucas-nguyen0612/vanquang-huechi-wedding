@@ -10,6 +10,7 @@ import {
   upsertPomodoroSettings,
 } from '@/features/pomodoro/actions'
 import { emitAppEvent } from '@/lib/events'
+import { playAlertTone } from '@/features/pomodoro/playAlertTone'
 
 export type Phase = 'work' | 'short' | 'long'
 
@@ -280,6 +281,11 @@ export const usePomodoroStore = create<PomodoroStore>()(
         const xpBase = 10
         const cleanBonus = state.interruptions === 0 ? 5 : 0
         const xpAwarded = xpBase + cleanBonus
+
+        // Play timer-end alert tone (reads notification_settings at firing time)
+        void playAlertTone().catch(err =>
+          console.error('[pomodoro] playAlertTone failed:', err)
+        )
 
         // Bump the active task's pomodoro count locally — the /api/pomodoro/sessions
         // endpoint mirrors this increment to the DB so reloads stay accurate.

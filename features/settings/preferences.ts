@@ -9,6 +9,7 @@ import {
   type Theme,
 } from '@/lib/settings/theme-cookie'
 import { appearanceSchema, type AppearanceInput } from '@/features/settings/schemas'
+import { notificationsSchema, type NotificationsInput } from '@/features/settings/notification-schemas'
 import type { Database } from '@/types/database'
 
 type ActionResult<T> =
@@ -52,6 +53,46 @@ export async function updateAppearance(
 
   await writeThemeCookie(parsed.data.theme, parsed.data.accent_hue)
   revalidatePath('/', 'layout')
+
+  return { data, error: null }
+}
+
+export async function updateNotifications(
+  input: NotificationsInput
+): Promise<ActionResult<UserPreferences>> {
+  const parsed = notificationsSchema.safeParse(input)
+  if (!parsed.success) {
+    return { data: null, error: { message: 'Invalid notification settings', code: 'VALIDATION_ERROR' } }
+  }
+
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { data: null, error: { message: 'Unauthorized', code: 'AUTH_REQUIRED' } }
+
+  const notification_settings = {
+    pomodoro_sound: parsed.data.pomodoro_sound,
+    pomodoro_volume: parsed.data.pomodoro_volume,
+    habit_reminders_enabled: parsed.data.habit_reminders_enabled,
+  }
+
+  const { data, error } = await (supabase
+    .from('user_preferences')
+    .upsert({ user_id: user.id, notification_settings } as never, { onConflict: 'user_id' })
+    .select('*')
+    .single() as unknown as Promise<{
+      data: UserPreferences | null
+      error: { message: string } | null
+    }>)
+
+  if (error || !data) {
+    return { data: null, error: { message: error?.message ?? 'Update failed', code: 'DB_ERROR' } }
+  }
+
+  try {
+    revalidatePath('/', 'layout')
+  } catch (revalidateErr) {
+    console.error('[notifications] revalidatePath failed:', revalidateErr)
+  }
 
   return { data, error: null }
 }

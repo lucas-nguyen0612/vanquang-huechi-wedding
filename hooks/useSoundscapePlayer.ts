@@ -4,14 +4,18 @@ import { useEffect, useRef } from 'react'
 import { usePomodoroStore } from '@/store/pomodoroStore'
 import { useSoundscapesQuery } from '@/hooks/useSoundscapes'
 
-const PRESET_IDS = new Set(['silent', 'rain', 'cafe', 'forest', 'space', 'lofi'])
+const PRESET_AUDIO: Record<string, string> = {
+  rain: '/sounds/rain.mp3',
+  cafe: '/sounds/cafe.mp3',
+  forest: '/sounds/forest.mp3',
+  space: '/sounds/space.mp3',
+  lofi: '/sounds/lofi.mp3',
+}
 
 /**
  * Plays the selected soundscape during work-phase Pomodoro sessions.
- *
- * Built-in presets (rain/cafe/...) are kept as quick-select labels but have
- * no audio assets bundled — only custom uploaded soundscapes actually play.
- * Picking a preset is treated as silent for now.
+ * Resolves the audio URL from bundled presets in /public/sounds first,
+ * then falls back to the user's uploaded soundscapes.
  */
 export function useSoundscapePlayer() {
   const audioRef = useRef<HTMLAudioElement | null>(null)
@@ -40,18 +44,21 @@ export function useSoundscapePlayer() {
     const audio = audioRef.current
     if (!audio) return
 
-    const isPreset = PRESET_IDS.has(soundscapeId)
-    const custom = soundscapes?.find(s => s.id === soundscapeId)
+    const presetUrl = PRESET_AUDIO[soundscapeId]
+    const customUrl = soundscapes?.find(s => s.id === soundscapeId)?.fileUrl
+    const nextUrl = presetUrl ?? customUrl ?? null
 
-    if (isPreset || !custom) {
-      // No playable audio — make sure nothing is playing.
+    if (!nextUrl) {
       if (!audio.paused) audio.pause()
       if (audio.src) audio.removeAttribute('src')
       return
     }
 
-    if (audio.src !== custom.fileUrl) {
-      audio.src = custom.fileUrl
+    // Resolve relative paths against the current origin so the strict
+    // equality check against audio.src (which is always absolute) works.
+    const absoluteUrl = new URL(nextUrl, window.location.href).href
+    if (audio.src !== absoluteUrl) {
+      audio.src = nextUrl
       audio.load()
     }
   }, [soundscapeId, soundscapes])

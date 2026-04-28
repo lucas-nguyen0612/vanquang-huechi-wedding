@@ -48,7 +48,7 @@ export default function OnboardingPage() {
         first_tool: toolId,
         onboarding_completed: true,
       })
-      .eq('id', user.id)
+      .eq('user_id', user.id)
 
     if (error) {
       setError(error.message)

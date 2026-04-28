@@ -8,15 +8,26 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 
-const schema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
-  confirmPassword: z.string(),
-}).refine((d) => d.password === d.confirmPassword, {
-  message: "Passwords don't match",
-  path: ['confirmPassword'],
-})
+const schema = z
+  .object({
+    email: z.string().email('Invalid email address'),
+    password: z.string().min(8, 'Password must be at least 8 characters'),
+    confirmPassword: z.string(),
+  })
+  .refine((d) => d.password === d.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword'],
+  })
 
 type FormData = z.infer<typeof schema>
 
@@ -26,7 +37,11 @@ export default function SignupPage() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
-  const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormData>({
     resolver: zodResolver(schema),
   })
 
@@ -46,85 +61,80 @@ export default function SignupPage() {
   }
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center p-4"
-      style={{ background: 'var(--bg-primary)' }}
-    >
-      <div
-        className="w-full max-w-sm space-y-6 p-8 rounded-xl"
-        style={{ background: 'var(--bg-secondary)', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 8px 32px rgba(0,0,0,0.4)' }}
-      >
-        <div className="text-center">
-          <h1
-            className="text-2xl font-semibold"
-            style={{ color: 'var(--neon-green)' }}
-          >
-            Create Account
-          </h1>
-          <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
-            Begin your productivity journey
-          </p>
-        </div>
+    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
+      <div className="w-full max-w-sm">
+        <Card>
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl">Create Account</CardTitle>
+            <CardDescription>Begin your productivity journey</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
+              <div className="grid gap-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  placeholder="m@example.com"
+                  aria-invalid={!!errors.email}
+                  {...register('email')}
+                />
+                {errors.email && (
+                  <p className="text-xs text-destructive">{errors.email.message}</p>
+                )}
+              </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {(['email', 'password', 'confirmPassword'] as const).map((field) => (
-            <div key={field}>
-              <label
-                htmlFor={field}
-                className="block text-sm font-medium mb-1"
-                style={{ color: 'var(--text-secondary)' }}
-              >
-                {field === 'confirmPassword' ? 'Confirm Password' : field.charAt(0).toUpperCase() + field.slice(1)}
-              </label>
-              <input
-                id={field}
-                type={field.includes('assword') ? 'password' : 'email'}
-                autoComplete={field === 'email' ? 'email' : 'new-password'}
-                {...register(field)}
-                className="w-full px-3 py-2 rounded-lg text-sm outline-none transition-colors"
-                style={{
-                  background: 'var(--bg-tertiary)',
-                  border: `1px solid ${errors[field] ? '#ef4444' : 'rgba(255,255,255,0.12)'}`,
-                  color: 'var(--text-primary)',
-                }}
-              />
-              {errors[field] && (
-                <p className="text-xs mt-1" style={{ color: '#ef4444' }}>
-                  {errors[field]?.message}
-                </p>
+              <div className="grid gap-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  autoComplete="new-password"
+                  aria-invalid={!!errors.password}
+                  {...register('password')}
+                />
+                {errors.password && (
+                  <p className="text-xs text-destructive">{errors.password.message}</p>
+                )}
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  autoComplete="new-password"
+                  aria-invalid={!!errors.confirmPassword}
+                  {...register('confirmPassword')}
+                />
+                {errors.confirmPassword && (
+                  <p className="text-xs text-destructive">
+                    {errors.confirmPassword.message}
+                  </p>
+                )}
+              </div>
+
+              {error && (
+                <p className="text-sm text-destructive">{error}</p>
               )}
-            </div>
-          ))}
 
-          {error && (
-            <div
-              className="px-4 py-2.5 rounded-lg text-sm"
-              style={{
-                background: 'rgba(239,68,68,0.15)',
-                border: '1px solid rgba(239,68,68,0.3)',
-                color: '#ef4444',
-              }}
-            >
-              {error}
-            </div>
-          )}
+              <Button type="submit" disabled={loading} className="w-full">
+                {loading ? 'Creating account...' : 'Create Account'}
+              </Button>
+            </form>
 
-          <Button
-            type="submit"
-            disabled={loading}
-            className="w-full"
-            style={{ background: 'var(--neon-green)', color: '#0a0a0f', fontWeight: 600 }}
-          >
-            {loading ? 'Creating account...' : 'Create Account'}
-          </Button>
-        </form>
-
-        <p className="text-center text-sm" style={{ color: 'var(--text-secondary)' }}>
-          Already have an account?{' '}
-          <Link href="/login" className="font-medium hover:underline" style={{ color: 'var(--neon-green)' }}>
-            Sign in
-          </Link>
-        </p>
+            <p className="mt-4 text-center text-sm text-muted-foreground">
+              Already have an account?{' '}
+              <Link
+                href="/login"
+                className="font-medium underline underline-offset-4 hover:text-foreground"
+              >
+                Sign in
+              </Link>
+            </p>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )

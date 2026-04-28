@@ -34,7 +34,7 @@ export function useProfileQuery(userId: string) {
       const { data, error } = await supabase
         .from('profiles')
         .select('id, character_name, avatar_url, character_class')
-        .eq('id', userId)
+        .eq('user_id', userId)
         .single()
 
       if (error) throw new Error(error.message)

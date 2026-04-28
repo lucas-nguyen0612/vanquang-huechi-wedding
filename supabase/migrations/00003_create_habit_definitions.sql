@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS public.habit_definitions (
   CONSTRAINT custom_days_valid       CHECK (
     custom_days IS NULL OR
     (array_length(custom_days, 1) > 0 AND
-     cardinality(custom_days) = (SELECT count(*) FROM unnest(custom_days) AS d WHERE d BETWEEN 0 AND 6))
+     custom_days <@ ARRAY[0,1,2,3,4,5,6]::smallint[])
   )
 );
 

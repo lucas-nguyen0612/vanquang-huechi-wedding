@@ -44,7 +44,7 @@ export default async function CharacterPage() {
     supabase
       .from('profiles')
       .select('character_name, character_class, avatar_url')
-      .eq('id', user.id)
+      .eq('user_id', user.id)
       .single(),
   ])
 

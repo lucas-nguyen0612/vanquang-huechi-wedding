@@ -37,7 +37,7 @@ export async function updateProfile(
   const { error: dbError } = await (supabase as any)
     .from('profiles')
     .update(payload)
-    .eq('id', user.id)
+    .eq('user_id', user.id)
 
   if (dbError) {
     return { data: null, error: { message: (dbError as { message: string }).message, code: 'DB_ERROR' } }
@@ -82,7 +82,7 @@ export async function uploadAvatar(
   const { data: profileRowRaw } = await (supabase as any)
     .from('profiles')
     .select('avatar_url')
-    .eq('id', user.id)
+    .eq('user_id', user.id)
     .single()
   const profileRow = profileRowRaw as { avatar_url: string | null } | null
 
@@ -117,7 +117,7 @@ export async function uploadAvatar(
   const { error: dbError } = await (supabase as any)
     .from('profiles')
     .update(avatarPayload)
-    .eq('id', user.id)
+    .eq('user_id', user.id)
 
   if (dbError) {
     // Attempt rollback of uploaded object — best effort
@@ -155,7 +155,7 @@ export async function removeAvatar(): Promise<ActionResult<{ avatar_url: null }>
   const { data: profileRowRaw } = await (supabase as any)
     .from('profiles')
     .select('avatar_url')
-    .eq('id', user.id)
+    .eq('user_id', user.id)
     .single()
   const profileRow = profileRowRaw as { avatar_url: string | null } | null
 
@@ -168,7 +168,7 @@ export async function removeAvatar(): Promise<ActionResult<{ avatar_url: null }>
   const { error: dbError } = await (supabase as any)
     .from('profiles')
     .update(removePayload)
-    .eq('id', user.id)
+    .eq('user_id', user.id)
 
   if (dbError) {
     return { data: null, error: { message: (dbError as { message: string }).message, code: 'DB_ERROR' } }
@@ -187,6 +187,3 @@ export async function removeAvatar(): Promise<ActionResult<{ avatar_url: null }>
 
   return { data: { avatar_url: null }, error: null }
 }
-
-// Re-export for consumers that need the mime list
-export { ALLOWED_MIME, MAX_SIZE_BYTES } from './profile-schemas'

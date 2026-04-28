@@ -37,7 +37,7 @@ export function AvatarUpload({ userId, currentAvatarUrl }: AvatarUploadProps) {
 
     // Client-side size guard
     if (file.size > MAX_SIZE_BYTES) {
-      setClientError('Image must be under 2 MB')
+      setClientError('Image must be under 5 MB')
       e.target.value = ''
       return
     }
@@ -159,7 +159,7 @@ export function AvatarUpload({ userId, currentAvatarUrl }: AvatarUploadProps) {
         </div>
 
         <p style={{ fontSize: 12, color: 'var(--jl-text-faint)', margin: 0 }}>
-          PNG, JPG or WEBP — max 2 MB
+          PNG, JPG or WEBP — max 5 MB
         </p>
 
         {clientError && (

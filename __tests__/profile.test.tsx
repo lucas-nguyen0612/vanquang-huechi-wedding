@@ -4,7 +4,7 @@
  * Covers the I/O matrix from spec-2-profile.md:
  *   - Zod schema boundaries (1, 2, 32, 33 chars; control chars)
  *   - updateProfile server action (happy path, auth failure, DB error)
- *   - File size guard (2 MB limit, 1 byte under, 1 byte over)
+ *   - File size guard (5 MB limit, 1 byte under, 1 byte over)
  *   - Mime guard (png, jpeg, webp pass; gif, pdf, etc. rejected)
  *
  * Note: uses Zod v4 `.issues` (not `.errors`) for error access.
@@ -83,29 +83,29 @@ describe('profileUpdateSchema — character_name boundaries', () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe('avatarUploadSchema — file size', () => {
-  it('accepts file exactly at the 2 MB limit', () => {
+  it('accepts file exactly at the 5 MB limit', () => {
     const file = makeFile(MAX_SIZE_BYTES)
     const result = avatarUploadSchema.safeParse({ file })
     expect(result.success).toBe(true)
   })
 
-  it('accepts file 1 byte under 2 MB', () => {
+  it('accepts file 1 byte under 5 MB', () => {
     const file = makeFile(MAX_SIZE_BYTES - 1)
     const result = avatarUploadSchema.safeParse({ file })
     expect(result.success).toBe(true)
   })
 
-  it('rejects file 1 byte over 2 MB', () => {
+  it('rejects file 1 byte over 5 MB', () => {
     const file = makeFile(MAX_SIZE_BYTES + 1)
     const result = avatarUploadSchema.safeParse({ file })
     expect(result.success).toBe(false)
     if (!result.success) {
-      expect(result.error.issues[0].message).toMatch(/under 2 MB/i)
+      expect(result.error.issues[0].message).toMatch(/under 5 MB/i)
     }
   })
 
-  it('rejects a 2.5 MB file', () => {
-    const file = makeFile(Math.round(2.5 * 1024 * 1024))
+  it('rejects a 5.5 MB file', () => {
+    const file = makeFile(Math.round(5.5 * 1024 * 1024))
     const result = avatarUploadSchema.safeParse({ file })
     expect(result.success).toBe(false)
   })

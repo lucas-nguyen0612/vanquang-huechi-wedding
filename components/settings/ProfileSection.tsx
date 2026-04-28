@@ -12,7 +12,7 @@ export async function ProfileSection() {
   const { data: profileRaw } = await (supabase as any)
     .from('profiles')
     .select('character_name, avatar_url')
-    .eq('id', user.id)
+    .eq('user_id', user.id)
     .single()
 
   const profile = profileRaw as { character_name: string; avatar_url: string | null } | null

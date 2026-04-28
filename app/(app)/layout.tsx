@@ -12,7 +12,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   const [statsRes, profileRes] = await Promise.all([
     supabase.from('character_stats').select('level, total_xp, xp_in_current_level').eq('user_id', user.id).single(),
-    supabase.from('profiles').select('character_name, avatar_url').eq('id', user.id).single(),
+    supabase.from('profiles').select('character_name, avatar_url').eq('user_id', user.id).single(),
   ])
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

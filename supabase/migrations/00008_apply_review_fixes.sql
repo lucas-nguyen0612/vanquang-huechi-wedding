@@ -62,7 +62,7 @@ ALTER TABLE public.habit_definitions
   ADD CONSTRAINT custom_days_valid CHECK (
     custom_days IS NULL OR
     (array_length(custom_days, 1) > 0 AND
-     cardinality(custom_days) = (SELECT count(*) FROM unnest(custom_days) AS d WHERE d BETWEEN 0 AND 6))
+     custom_days <@ ARRAY[0,1,2,3,4,5,6]::smallint[])
   );
 
 DROP INDEX IF EXISTS idx_habit_definitions_user_active;
@@ -78,68 +78,8 @@ ALTER TABLE public.habit_entries
 
 -- ============================================================
 -- 00005 gam_xp_transactions fixes:
--- - Rename source_ref_id → old_source_ref_id
--- - Add pomo_session_id and habit_entry_id as proper FKs
--- - Add CHECK exactly_one_source_ref
--- - Replace old unique constraint with two new partial ones
--- - Drop old unique index (now replaced by two partial indexes)
--- ============================================================
-
--- Rename the old polymorphic column (keep data for reference, will migrate later)
-ALTER TABLE public.gam_xp_transactions
-  RENAME COLUMN source_ref_id TO old_source_ref_id;
-
--- Add the two proper FK columns
-ALTER TABLE public.gam_xp_transactions
-  ADD COLUMN pomo_session_id UUID,
-  ADD COLUMN habit_entry_id  UUID;
-
--- Populate the new columns from old_source_ref_id using source_type
--- This runs as a one-time data migration
-UPDATE public.gam_xp_transactions
-SET
-  pomo_session_id = CASE WHEN source_type = 'pomodoro' THEN old_source_ref_id::UUID ELSE NULL END,
-  habit_entry_id  = CASE WHEN source_type = 'habit'    THEN old_source_ref_id::UUID ELSE NULL END;
-
--- Add FK constraints
-ALTER TABLE public.gam_xp_transactions
-  ADD CONSTRAINT fk_pomo_session
-    FOREIGN KEY (pomo_session_id) REFERENCES public.pomo_sessions(id) ON DELETE SET NULL
-    DEFERRABLE INITIALLY DEFERRED;
-
-ALTER TABLE public.gam_xp_transactions
-  ADD CONSTRAINT fk_habit_entry
-    FOREIGN KEY (habit_entry_id) REFERENCES public.habit_entries(id) ON DELETE SET NULL
-    DEFERRABLE INITIALLY DEFERRED;
-
--- Exactly one source must be set
-ALTER TABLE public.gam_xp_transactions
-  DROP CONSTRAINT IF EXISTS exactly_one_source_ref,
-  ADD CONSTRAINT exactly_one_source_ref CHECK (
-    (pomo_session_id IS NOT NULL AND habit_entry_id IS NULL) OR
-    (pomo_session_id IS NULL    AND habit_entry_id IS NOT NULL)
-  );
-
--- Replace old unique index with two partial ones
-DROP INDEX IF EXISTS uq_gam_xp_transactions_source;
-
-CREATE UNIQUE INDEX IF NOT EXISTS uq_gam_xp_transactions_pomo
-  ON public.gam_xp_transactions (source_type, pomo_session_id)
-  WHERE pomo_session_id IS NOT NULL;
-
-CREATE UNIQUE INDEX IF NOT EXISTS uq_gam_xp_transactions_habit
-  ON public.gam_xp_transactions (source_type, habit_entry_id)
-  WHERE habit_entry_id IS NOT NULL;
-
--- Add XP amount upper bound
-ALTER TABLE public.gam_xp_transactions
-  DROP CONSTRAINT IF EXISTS xp_amount_positive,
-  ADD CONSTRAINT xp_amount_positive CHECK (amount > 0 AND amount <= 1000);
-
--- Drop the now-obsolete source_ref_id column (data has been migrated)
-ALTER TABLE public.gam_xp_transactions
-  DROP COLUMN old_source_ref_id;
-
+-- (Obsolete: 00005 was rewritten to land on the split-FK schema directly,
+--  so the old polymorphic→split data migration is no longer needed.)
 -- Sync trigger already created in 00005
 -- Re-create to ensure it references correct column names
 DROP TRIGGER IF EXISTS gam_xp_transactions_sync_profile ON public.gam_xp_transactions;

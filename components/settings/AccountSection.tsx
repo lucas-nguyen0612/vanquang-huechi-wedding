@@ -15,7 +15,7 @@ export async function AccountSection() {
   const { data: profileData } = await (supabase
     .from('profiles')
     .select('character_name')
-    .eq('id', user.id)
+    .eq('user_id', user.id)
     .maybeSingle() as unknown as Promise<{
       data: { character_name: string } | null
       error: { message: string } | null

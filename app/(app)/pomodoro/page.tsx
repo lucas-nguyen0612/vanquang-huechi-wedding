@@ -61,20 +61,28 @@ export default function PomodoroPage() {
 
   const [focusMode, setFocusMode] = useState(false)
 
+  // Focus mode is opened explicitly: clicking Start during a work phase, pressing the
+  // Focus Mode button, or hitting F. It is NOT auto-opened from `isRunning` changes —
+  // navigating back to /pomodoro mid-session or cross-tab sync should not steal the UI.
+  function handleStart() {
+    startTimer()
+    if (phase === 'work') setFocusMode(true)
+  }
+
   // Keyboard shortcuts
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
       if (e.key === ' ') {
         e.preventDefault()
-        if (isRunning) { pauseTimer() } else { startTimer() }
+        if (isRunning) { pauseTimer() } else { handleStart() }
       }
       if (e.key === 'r' || e.key === 'R') resetTimer()
       if (e.key === 'f' || e.key === 'F') setFocusMode(m => !m)
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [isRunning, startTimer, pauseTimer, resetTimer])
+  }, [isRunning, phase, startTimer, pauseTimer, resetTimer])
 
   // Notification permission
   useEffect(() => {
@@ -227,7 +235,7 @@ export default function PomodoroPage() {
 
                     <TimerControls
                       isRunning={isRunning}
-                      onStart={startTimer}
+                      onStart={handleStart}
                       onPause={pauseTimer}
                       onReset={resetTimer}
                       onSkip={skipPhase}

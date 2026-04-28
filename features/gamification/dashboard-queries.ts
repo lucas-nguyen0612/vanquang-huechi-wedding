@@ -280,7 +280,7 @@ export async function fetchDashboardData(userId: string): Promise<DashboardData>
     supabase
       .from('profiles')
       .select('character_name, character_class')
-      .eq('id', userId)
+      .eq('user_id', userId)
       .maybeSingle(),
     supabase
       .from('level_thresholds')

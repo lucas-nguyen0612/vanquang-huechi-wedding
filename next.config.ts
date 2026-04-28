@@ -18,6 +18,12 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_APP_VERSION: appVersion,
     NEXT_PUBLIC_BUILD_DATE: buildDate,
   },
+  experimental: {
+    serverActions: {
+      // Avatar uploads cap at 5 MB; headroom for FormData multipart overhead.
+      bodySizeLimit: '6mb',
+    },
+  },
 };
 
 export default nextConfig;

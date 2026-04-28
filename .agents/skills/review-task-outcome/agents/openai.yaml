@@ -1,4 +1,0 @@
-interface:
-  display_name: "Task Outcome Review"
-  short_description: "Review completed work against tasks and requirements"
-  default_prompt: "Use $review-task-outcome to explain completed work, compare it to the story or task, report completion, and justify deviations."

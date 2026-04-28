@@ -43,13 +43,13 @@ export default async function CharacterPage() {
     fetchXPTimeline(user.id, 20),
     supabase
       .from('profiles')
-      .select('character_name, character_class')
+      .select('character_name, character_class, avatar_url')
       .eq('id', user.id)
       .single(),
   ])
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const profile = profileRes.data as any as { character_name: string; character_class: string } | null
+  const profile = profileRes.data as any as { character_name: string; character_class: string; avatar_url: string | null } | null
   const characterName = profile?.character_name ?? 'Adventurer'
   const characterClass = profile?.character_class ?? 'Scholar'
 
@@ -99,6 +99,7 @@ export default async function CharacterPage() {
               stats={fallbackStats}
               characterName={characterName}
               characterClass={characterClass}
+              avatarHref="/settings/profile"
             />
             <StatChart
               stats={{

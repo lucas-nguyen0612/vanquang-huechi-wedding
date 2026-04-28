@@ -1,4 +1,5 @@
 import { type FC } from 'react'
+import Link from 'next/link'
 import { Avatar } from '@/components/rpg/Avatar'
 import { LevelBadge } from '@/components/rpg/LevelBadge'
 import { RarityChip } from '@/components/rpg/RarityChip'
@@ -33,6 +34,8 @@ interface CharacterSheetProps {
   characterName?: string
   characterClass?: string
   title?: string
+  /** If provided, the avatar will be wrapped in a Link to this href. */
+  avatarHref?: string
 }
 
 export const CharacterSheet: FC<CharacterSheetProps> = ({
@@ -40,6 +43,7 @@ export const CharacterSheet: FC<CharacterSheetProps> = ({
   characterName = 'Adventurer',
   characterClass = 'Scholar',
   title,
+  avatarHref,
 }) => {
   const tier = getLevelTier(stats.level)
   const tierLabel = getTierLabel(stats.level)
@@ -55,9 +59,15 @@ export const CharacterSheet: FC<CharacterSheetProps> = ({
         textAlign: 'center',
       }}
     >
-      {/* Avatar */}
+      {/* Avatar — optionally wrapped in a Link for deep-link navigation */}
       <div style={{ display: 'grid', placeItems: 'center', marginBottom: 14 }}>
-        <Avatar level={stats.level} size={120} />
+        {avatarHref ? (
+          <Link href={avatarHref} aria-label="Edit profile" style={{ display: 'block', borderRadius: '50%' }}>
+            <Avatar level={stats.level} size={120} />
+          </Link>
+        ) : (
+          <Avatar level={stats.level} size={120} />
+        )}
       </div>
 
       {/* Class label */}

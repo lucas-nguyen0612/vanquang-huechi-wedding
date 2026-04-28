@@ -1,13 +1,24 @@
 import { TopBar } from '@/components/layout/TopBar'
 import { MobileBackLink } from '@/components/settings/MobileBackLink'
+import { ProfileSection } from '@/components/settings/ProfileSection'
 
-export default function SettingsProfilePage() {
+export const metadata = {
+  title: 'Profile — JL-Tools',
+}
+
+export default function ProfileSettingsPage() {
   return (
     <div className="flex flex-col h-full">
       <MobileBackLink />
-      <TopBar title="Profile" />
-      <div style={{ padding: '22px 28px', color: 'var(--jl-text-soft)', fontSize: 14 }}>
-        <p>Coming soon.</p>
+      <TopBar
+        title="Profile"
+        subtitle="Manage your display name and avatar."
+      />
+      <div
+        className="flex-1 overflow-y-auto"
+        style={{ padding: '24px 28px 40px' }}
+      >
+        <ProfileSection />
       </div>
     </div>
   )

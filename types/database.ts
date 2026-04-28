@@ -15,6 +15,7 @@ export type Database = {
           preferred_theme: string
           accent_hue: number
           timezone: string
+          avatar_url: string | null
           created_at: string
           updated_at: string
         }

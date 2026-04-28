@@ -12,13 +12,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   const [statsRes, profileRes] = await Promise.all([
     supabase.from('character_stats').select('level, total_xp, xp_in_current_level').eq('user_id', user.id).single(),
-    supabase.from('profiles').select('character_name').eq('id', user.id).single(),
+    supabase.from('profiles').select('character_name, avatar_url').eq('id', user.id).single(),
   ])
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const stats = statsRes.data as any as { level: number; total_xp: number; xp_in_current_level: number } | null
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const profile = profileRes.data as any as { character_name: string } | null
+  const profile = profileRes.data as any as { character_name: string; avatar_url: string | null } | null
 
   const level = stats?.level ?? 1
   const totalXP = stats?.total_xp ?? 0

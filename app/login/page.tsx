@@ -7,6 +7,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/client'
+import { syncAppearanceCookies } from '@/features/settings/preferences'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -59,8 +60,13 @@ export default function LoginPage() {
       }
       setLoading(false)
     } else {
-      router.push('/dashboard')
+      const sync = await syncAppearanceCookies()
+      if (sync.error) {
+        // Non-blocking: dashboard will fall back to default theme cookies.
+        console.warn('syncAppearanceCookies failed:', sync.error)
+      }
       router.refresh()
+      router.push('/dashboard')
     }
   }
 

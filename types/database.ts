@@ -313,6 +313,41 @@ export type Database = {
         Insert: Omit<Database['public']['Tables']['level_thresholds']['Row'], 'created_at'>
         Update: Partial<Database['public']['Tables']['level_thresholds']['Row']>
       }
+      user_preferences: {
+        Row: {
+          user_id: string
+          appearance_settings: { theme: 'light' | 'dark' | 'system'; accent_hue: number }
+          notification_settings: {
+            pomodoro_sound: boolean
+            pomodoro_volume: number
+            habit_reminders_enabled: boolean
+          }
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          user_id: string
+          appearance_settings?: { theme: 'light' | 'dark' | 'system'; accent_hue: number }
+          notification_settings?: {
+            pomodoro_sound: boolean
+            pomodoro_volume: number
+            habit_reminders_enabled: boolean
+          }
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          user_id?: string
+          appearance_settings?: { theme: 'light' | 'dark' | 'system'; accent_hue: number }
+          notification_settings?: {
+            pomodoro_sound: boolean
+            pomodoro_volume: number
+            habit_reminders_enabled: boolean
+          }
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
     Views: Record<string, never>
     Functions: {

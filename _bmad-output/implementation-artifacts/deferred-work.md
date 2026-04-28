@@ -17,6 +17,20 @@ Pre-existing or out-of-scope concerns surfaced by the 3-reviewer pass on Story 1
 
 ---
 
+## From: spec-4-appearance review (2026-04-28)
+
+Findings from the 3-reviewer pass on Story 4 that don't block ship — each should become its own focused follow-up.
+
+- **System theme not reactive to OS changes.** `ThemeRadio` reads `matchMedia('(prefers-color-scheme: dark)')` once at click time, and the inline pre-paint script does the same on first paint. After load, switching the OS theme while `system` is selected does nothing until the page reloads. Add a `change` listener inside `applyThemeClass`, gated on `theme === 'system'`. (Findings F3 / E9.)
+- **Sign-out doesn't clear theme cookies.** `clearThemeCookie()` exists but is never wired. On shared devices, User A's cookie leaks into User B's pre-login experience (User B sees A's theme until login fires `syncAppearanceCookies`). Wire it into the existing sign-out flow once that path is touched. (Finding E12.)
+- **ThemeRadio rapid-click race.** Multiple in-flight transitions can roll back to a stale `previous` from an earlier closure. Bound on `useTransition` ordering, but worst-case the visible state desyncs from the cookie/DB. Add an in-flight guard or version token. (Finding E8.)
+- **Cookie `secure` flag.** `jl-theme` and `jl-hue` cookies are served without `secure` — fine in dev over HTTP, but production should set `secure: true`. Decide via env-aware option. (Finding F7.)
+- **DB CHECK constraint on `appearance_settings`.** Hue is bounded only at the application layer (Zod). A future code path could write garbage. Add a `CHECK ((appearance_settings->>'accent_hue')::int BETWEEN 0 AND 360)` and a similar enum check on `theme`. (Finding F6.)
+- **Test: assert exactly one DB write after rapid hue drags.** Spec AC says "exactly one DB write fires 300ms after release"; the unit suite covers Zod and the action shape but not the debounce-collapses-to-one invariant. Add a fake-timer test on `HueSlider`. (Finding A8.)
+- **Runtime validation when reading `appearance_settings` JSONB.** `AppearanceSection` trusts the row's typed shape and only nullish-coalesces. Corrupt/legacy rows with `theme: "neon"` would propagate. Pass through `appearanceSchema.safeParse` on read. (Finding E11.)
+
+---
+
 ## From: docs/features/user-settings.md (split 2026-04-28)
 
 Source intent: convert the User Settings doc into implementation specs. Lucas chose to split — Story 1 (shell + nav) is being repackaged as `spec-1-settings-shell.md`. The remaining 5 stories below are deferred and need their own specs when ready.

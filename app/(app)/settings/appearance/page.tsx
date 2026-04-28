@@ -1,14 +1,13 @@
 import { TopBar } from '@/components/layout/TopBar'
 import { MobileBackLink } from '@/components/settings/MobileBackLink'
+import { AppearanceSection } from '@/components/settings/AppearanceSection'
 
 export default function SettingsAppearancePage() {
   return (
     <div className="flex flex-col h-full">
       <MobileBackLink />
       <TopBar title="Appearance" />
-      <div style={{ padding: '22px 28px', color: 'var(--jl-text-soft)', fontSize: 14 }}>
-        <p>Coming soon.</p>
-      </div>
+      <AppearanceSection />
     </div>
   )
 }

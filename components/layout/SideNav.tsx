@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Target, Timer, Flame, Layers, Swords, Users, Shield } from 'lucide-react'
+import { Target, Timer, Flame, Layers, Swords, Users, Shield, Settings } from 'lucide-react'
 import { Avatar } from '@/components/rpg/Avatar'
 import { XPBar } from '@/components/rpg/XPBar'
 
@@ -13,7 +13,7 @@ type NavItem = {
   disabled?: boolean
 }
 
-const NAV_ITEMS: NavItem[] = [
+export const NAV_ITEMS: NavItem[] = [
   { href: '/dashboard', icon: Target, label: 'Dashboard' },
   { href: '/pomodoro', icon: Timer, label: 'Pomodoro' },
   { href: '/habits', icon: Flame, label: 'Habits' },
@@ -21,6 +21,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: '/quests', icon: Swords, label: 'Quests', disabled: true },
   { href: '/guild', icon: Users, label: 'Guild', disabled: true },
   { href: '/character', icon: Shield, label: 'Character' },
+  { href: '/settings', icon: Settings, label: 'Settings' },
 ]
 
 interface SideNavProps {

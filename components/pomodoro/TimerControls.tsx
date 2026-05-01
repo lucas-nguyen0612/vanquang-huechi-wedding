@@ -1,9 +1,17 @@
 'use client'
 
 import { Play, Pause, RotateCcw, SkipForward } from 'lucide-react'
+import { useTranslations } from 'next-intl'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 interface TimerControlsProps {
   isRunning: boolean
+  isLeader?: boolean
   onStart: () => void
   onPause: () => void
   onReset: () => void
@@ -24,63 +32,110 @@ const iconButtonStyle: React.CSSProperties = {
   flexShrink: 0,
 }
 
+const disabledIconButtonStyle: React.CSSProperties = {
+  ...iconButtonStyle,
+  opacity: 0.4,
+  cursor: 'not-allowed',
+}
+
 export function TimerControls({
   isRunning,
+  isLeader = true,
   onStart,
   onPause,
   onReset,
   onSkip,
 }: TimerControlsProps) {
+  const t = useTranslations('pomodoro.controls')
+  const followerTip = t('followerTabDisabled')
+
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-      {/* Primary Start / Pause button */}
-      <button
-        onClick={isRunning ? onPause : onStart}
-        style={{
-          height: 46,
-          padding: '0 22px',
-          fontSize: 14,
-          display: 'flex',
-          alignItems: 'center',
-          gap: 8,
-          background: 'var(--jl-accent-strong)',
-          color: 'white',
-          border: 'none',
-          borderRadius: 'var(--jl-r)',
-          cursor: 'pointer',
-          fontWeight: 600,
-        }}
-      >
-        {isRunning ? (
-          <>
-            <Pause size={15} />
-            Pause
-          </>
-        ) : (
-          <>
-            <Play size={15} />
-            Start
-          </>
-        )}
-      </button>
+    <TooltipProvider delayDuration={300}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
 
-      {/* Reset button */}
-      <button
-        onClick={onReset}
-        aria-label="Reset timer"
-        style={iconButtonStyle}
-      >
-        <RotateCcw size={14} />
-      </button>
+        {/* Primary Start / Pause button */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            {/* span captures hover even when button is disabled */}
+            <span style={{ display: 'inline-flex' }}>
+              <button
+                onClick={isLeader ? (isRunning ? onPause : onStart) : undefined}
+                disabled={!isLeader}
+                style={{
+                  height: 46,
+                  padding: '0 22px',
+                  fontSize: 14,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  background: isLeader ? 'var(--jl-accent-strong)' : 'var(--jl-bg-sunken)',
+                  color: isLeader ? 'white' : 'var(--jl-text-faint)',
+                  border: isLeader ? 'none' : '1px solid var(--jl-line)',
+                  borderRadius: 'var(--jl-r)',
+                  cursor: isLeader ? 'pointer' : 'not-allowed',
+                  fontWeight: 600,
+                  opacity: isLeader ? 1 : 0.5,
+                  transition: 'opacity 0.15s',
+                }}
+              >
+                {isRunning ? (
+                  <>
+                    <Pause size={15} />
+                    {t('pause')}
+                  </>
+                ) : (
+                  <>
+                    <Play size={15} />
+                    {t('start')}
+                  </>
+                )}
+              </button>
+            </span>
+          </TooltipTrigger>
+          {!isLeader && (
+            <TooltipContent side="top">{followerTip}</TooltipContent>
+          )}
+        </Tooltip>
 
-      {/* Skip button */}
-      <button
-        onClick={onSkip}
-        aria-label="Skip to next phase"
-        style={iconButtonStyle}
-      >
-        <SkipForward size={14} />
-      </button>
-    </div>
+        {/* Reset button */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span style={{ display: 'inline-flex' }}>
+              <button
+                onClick={isLeader ? onReset : undefined}
+                disabled={!isLeader}
+                aria-label={t('reset')}
+                style={isLeader ? iconButtonStyle : disabledIconButtonStyle}
+              >
+                <RotateCcw size={14} />
+              </button>
+            </span>
+          </TooltipTrigger>
+          {!isLeader && (
+            <TooltipContent side="top">{followerTip}</TooltipContent>
+          )}
+        </Tooltip>
+
+        {/* Skip button */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span style={{ display: 'inline-flex' }}>
+              <button
+                onClick={isLeader ? onSkip : undefined}
+                disabled={!isLeader}
+                aria-label={t('skip')}
+                style={isLeader ? iconButtonStyle : disabledIconButtonStyle}
+              >
+                <SkipForward size={14} />
+              </button>
+            </span>
+          </TooltipTrigger>
+          {!isLeader && (
+            <TooltipContent side="top">{followerTip}</TooltipContent>
+          )}
+        </Tooltip>
+
+      </div>
+    </TooltipProvider>
   )
 }

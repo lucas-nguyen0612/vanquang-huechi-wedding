@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
 import { X, Volume2, VolumeX } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { usePomodoroStore } from '@/store/pomodoroStore'
 import { PomodoroTimer } from './PomodoroTimer'
 import { TimerControls } from './TimerControls'
@@ -8,6 +9,11 @@ import { FocusTaskList } from './FocusTaskList'
 
 interface FocusModeOverlayProps {
   onClose: () => void
+  onStart: () => void
+  onPause: () => void
+  onReset: () => void
+  onSkip: () => void
+  isLeader?: boolean
 }
 
 const DESKTOP_BREAKPOINT = 1024
@@ -21,17 +27,14 @@ function clamp(value: number, lo: number, hi: number) {
   return Math.max(lo, Math.min(hi, value))
 }
 
-export function FocusModeOverlay({ onClose }: FocusModeOverlayProps) {
+export function FocusModeOverlay({ onClose, onStart, onPause, onReset, onSkip, isLeader = true }: FocusModeOverlayProps) {
+  const t = useTranslations('pomodoro')
   const phase = usePomodoroStore(s => s.phase)
   const timeLeft = usePomodoroStore(s => s.timeLeft)
   const isRunning = usePomodoroStore(s => s.isRunning)
   const settings = usePomodoroStore(s => s.settings)
   const activeTaskId = usePomodoroStore(s => s.activeTaskId)
   const tasks = usePomodoroStore(s => s.tasks)
-  const startTimer = usePomodoroStore(s => s.startTimer)
-  const pauseTimer = usePomodoroStore(s => s.pauseTimer)
-  const resetTimer = usePomodoroStore(s => s.resetTimer)
-  const skipPhase = usePomodoroStore(s => s.skipPhase)
   const updateSettings = usePomodoroStore(s => s.updateSettings)
 
   const activeTask = tasks.find(t => t.id === activeTaskId)
@@ -106,27 +109,28 @@ export function FocusModeOverlay({ onClose }: FocusModeOverlayProps) {
       {activeTask ? (
         <div style={{ textAlign: 'center' }}>
           <div style={{ fontSize: 11, color: 'var(--jl-text-faint)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>
-            Working on
+            {t('timer.workingOn')}
           </div>
           <div style={{ fontSize: 22, fontFamily: 'var(--jl-font-display)', letterSpacing: '-0.02em' }}>
             {activeTask.title}
           </div>
           <div style={{ fontSize: 12, color: 'var(--jl-text-soft)', marginTop: 2 }}>
-            {activeTask.pomodorosDone}/{activeTask.pomodorosEstimated} pomodoros
+            {t('timer.pomodorosCount', { done: activeTask.pomodorosDone, total: activeTask.pomodorosEstimated })}
           </div>
         </div>
       ) : (
         <div style={{ fontSize: 13, color: 'var(--jl-text-faint)', textAlign: 'center' }}>
-          {isDesktop ? 'Pick a task on the right to focus on' : 'Pick a task below to focus on'}
+          {isDesktop ? t('timer.noTaskDesktop') : t('timer.noTaskMobile')}
         </div>
       )}
 
       <TimerControls
         isRunning={isRunning}
-        onStart={startTimer}
-        onPause={pauseTimer}
-        onReset={resetTimer}
-        onSkip={skipPhase}
+        isLeader={isLeader}
+        onStart={onStart}
+        onPause={onPause}
+        onReset={onReset}
+        onSkip={onSkip}
       />
     </div>
   )
@@ -171,8 +175,8 @@ export function FocusModeOverlay({ onClose }: FocusModeOverlayProps) {
       >
         <button
           onClick={toggleMute}
-          aria-label={isMuted ? 'Unmute soundscape' : 'Mute soundscape'}
-          title={isMuted ? 'Unmute' : 'Mute'}
+          aria-label={isMuted ? t('controls.unmuteSoundscape') : t('controls.muteSoundscape')}
+          title={isMuted ? t('controls.unmute') : t('controls.mute')}
           style={{
             width: 32,
             height: 32,
@@ -190,7 +194,7 @@ export function FocusModeOverlay({ onClose }: FocusModeOverlayProps) {
         </button>
         <button
           onClick={onClose}
-          aria-label="Exit focus mode"
+          aria-label={t('controls.exitFocus')}
           style={{
             background: 'var(--jl-bg-raised)',
             border: '1px solid var(--jl-line)',
@@ -205,7 +209,7 @@ export function FocusModeOverlay({ onClose }: FocusModeOverlayProps) {
             height: 32,
           }}
         >
-          <X size={14} /> Exit Focus Mode
+          <X size={14} /> {t('controls.exitFocus')}
         </button>
       </div>
 

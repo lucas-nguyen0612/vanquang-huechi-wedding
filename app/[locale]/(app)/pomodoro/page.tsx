@@ -1,9 +1,11 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { Target } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { TopBar } from '@/components/layout/TopBar'
 import { hydratePomodoroFromDb, usePomodoroStore } from '@/store/pomodoroStore'
 import { useTimer } from '@/hooks/useTimer'
+import { usePomodoroSync } from '@/hooks/usePomodoroSync'
 import { useSoundscapePlayer } from '@/hooks/useSoundscapePlayer'
 import { PomodoroTimer } from '@/components/pomodoro/PomodoroTimer'
 import { ModeSelector } from '@/components/pomodoro/ModeSelector'
@@ -22,13 +24,15 @@ const cardStyle: React.CSSProperties = {
   background: 'var(--jl-bg-raised)',
   border: '1px solid var(--jl-line-soft)',
   borderRadius: 'var(--jl-r-lg)',
-  padding: 20,
+  padding: 'var(--jl-p)',
 }
 
 export default function PomodoroPage() {
-  // Activate RAF timer hook
-  useTimer()
-  // Plays the selected soundscape during work-phase sessions.
+  const t = useTranslations('pomodoro')
+
+  // Leader election: only the leader tab runs the RAF timer loop.
+  const { isLeader, claimLeadership } = usePomodoroSync()
+  useTimer({ enabled: isLeader })
   useSoundscapePlayer()
 
   // Hydrate tasks + settings from DB once on mount
@@ -61,12 +65,27 @@ export default function PomodoroPage() {
 
   const [focusMode, setFocusMode] = useState(false)
 
-  // Focus mode is opened explicitly: clicking Start during a work phase, pressing the
-  // Focus Mode button, or hitting F. It is NOT auto-opened from `isRunning` changes —
-  // navigating back to /pomodoro mid-session or cross-tab sync should not steal the UI.
+  // Any explicit timer interaction claims leadership so this tab becomes the sole runner.
+  // Focus mode is opened only on the tab where the user clicks — never via sync.
   function handleStart() {
+    claimLeadership()
     startTimer()
     if (phase === 'work') setFocusMode(true)
+  }
+
+  function handlePause() {
+    claimLeadership()
+    pauseTimer()
+  }
+
+  function handleReset() {
+    claimLeadership()
+    resetTimer()
+  }
+
+  function handleSkip() {
+    claimLeadership()
+    skipPhase()
   }
 
   // Keyboard shortcuts
@@ -75,14 +94,14 @@ export default function PomodoroPage() {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
       if (e.key === ' ') {
         e.preventDefault()
-        if (isRunning) { pauseTimer() } else { handleStart() }
+        if (isRunning) { handlePause() } else { handleStart() }
       }
-      if (e.key === 'r' || e.key === 'R') resetTimer()
+      if (e.key === 'r' || e.key === 'R') handleReset()
       if (e.key === 'f' || e.key === 'F') setFocusMode(m => !m)
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [isRunning, phase, startTimer, pauseTimer, resetTimer])
+  }, [isRunning, phase, claimLeadership, startTimer, pauseTimer, resetTimer])
 
   // Notification permission
   useEffect(() => {
@@ -95,33 +114,13 @@ export default function PomodoroPage() {
   useEffect(() => {
     return onAppEvent('jl:xp-gain', () => {
       if (Notification.permission === 'granted') {
-        new Notification('JL Tools · Session Complete 🍅', {
-          body: 'Nice work! Take a break and earn your XP.',
+        new Notification(t('session.completeNotificationTitle'), {
+          body: t('session.completeNotificationBody'),
           icon: '/favicon.ico',
         })
       }
     })
-  }, [])
-
-  // BroadcastChannel cross-tab sync
-  useEffect(() => {
-    const bc = new BroadcastChannel('jl-pomodoro')
-    bc.onmessage = (e) => {
-      if (e.data.type === 'sync') {
-        usePomodoroStore.setState(e.data.state)
-      }
-    }
-    const unsub = usePomodoroStore.subscribe(state => {
-      bc.postMessage({
-        type: 'sync',
-        state: { timeLeft: state.timeLeft, isRunning: state.isRunning, phase: state.phase },
-      })
-    })
-    return () => {
-      unsub()
-      bc.close()
-    }
-  }, [])
+  }, [t])
 
   // Phase selector handler
   function handlePhaseSelect(p: 'work' | 'short' | 'long') {
@@ -140,17 +139,26 @@ export default function PomodoroPage() {
 
   return (
     <ToolErrorBoundary toolName="Pomodoro">
-      {focusMode && <FocusModeOverlay onClose={() => setFocusMode(false)} />}
+      {focusMode && (
+        <FocusModeOverlay
+          onClose={() => setFocusMode(false)}
+          onStart={handleStart}
+          onPause={handlePause}
+          onReset={handleReset}
+          onSkip={handleSkip}
+          isLeader={isLeader}
+        />
+      )}
 
       <div className="flex flex-col h-full">
         <TopBar
-          title="Pomodoro"
-          subtitle="Focus block · +10 XP per session"
+          title={t('title')}
+          subtitle={t('subtitle')}
           rightSlot={
             <div style={{ display: 'flex', gap: 8 }}>
               <button
                 onClick={() => setFocusMode(m => !m)}
-                title="Focus mode (F)"
+                title={t('controls.focusModeHint')}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -167,7 +175,7 @@ export default function PomodoroPage() {
                 }}
               >
                 <Target size={13} />
-                Focus Mode
+                {t('controls.focusModeToggle')}
               </button>
 
               <DurationSettingsModal />
@@ -175,15 +183,15 @@ export default function PomodoroPage() {
           }
         />
 
-        <div className="flex-1 overflow-auto" style={{ padding: '22px 28px 40px' }}>
-          <div className="grid grid-cols-[1fr_360px] gap-[22px]">
+        <div className="flex-1 overflow-auto p-jl pb-10">
+          <div className="grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-[22px]">
 
             {/* ── Left column ── */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
 
               {/* Timer card */}
               <div style={cardStyle}>
-                <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 36, alignItems: 'center' }}>
+                <div className="flex flex-col items-center xl:grid xl:grid-cols-[auto_1fr]" style={{ gap: 36, alignItems: 'center' }}>
                   {/* Circular timer */}
                   <PomodoroTimer phase={phase} timeLeft={timeLeft} totalDuration={totalDuration} />
 
@@ -212,7 +220,7 @@ export default function PomodoroPage() {
                             marginBottom: 6,
                           }}
                         >
-                          Working on
+                          {t('timer.workingOn')}
                         </div>
                         <div
                           style={{
@@ -224,21 +232,22 @@ export default function PomodoroPage() {
                           {activeTask.title}
                         </div>
                         <div style={{ fontSize: 12, color: 'var(--jl-text-soft)', marginTop: 4 }}>
-                          {activeTask.pomodorosDone}/{activeTask.pomodorosEstimated} pomodoros
+                          {t('timer.pomodorosCount', { done: activeTask.pomodorosDone, total: activeTask.pomodorosEstimated })}
                         </div>
                       </div>
                     ) : (
                       <div style={{ fontSize: 14, color: 'var(--jl-text-faint)' }}>
-                        No task selected — click a task below to focus
+                        {t('timer.noTaskSelected')}
                       </div>
                     )}
 
                     <TimerControls
                       isRunning={isRunning}
+                      isLeader={isLeader}
                       onStart={handleStart}
-                      onPause={pauseTimer}
-                      onReset={resetTimer}
-                      onSkip={skipPhase}
+                      onPause={handlePause}
+                      onReset={handleReset}
+                      onSkip={handleSkip}
                     />
 
                     <SessionDots
@@ -249,9 +258,10 @@ export default function PomodoroPage() {
 
                     {/* Keyboard hint */}
                     <div style={{ fontSize: 11, color: 'var(--jl-text-faint)' }}>
-                      <kbd style={{ padding: '1px 5px', background: 'var(--jl-bg-sunken)', borderRadius: 3, border: '1px solid var(--jl-line)', fontSize: 10 }}>Space</kbd> start/pause ·{' '}
-                      <kbd style={{ padding: '1px 5px', background: 'var(--jl-bg-sunken)', borderRadius: 3, border: '1px solid var(--jl-line)', fontSize: 10 }}>R</kbd> reset ·{' '}
-                      <kbd style={{ padding: '1px 5px', background: 'var(--jl-bg-sunken)', borderRadius: 3, border: '1px solid var(--jl-line)', fontSize: 10 }}>F</kbd> focus mode
+                      <kbd style={{ padding: '1px 5px', background: 'var(--jl-bg-sunken)', borderRadius: 3, border: '1px solid var(--jl-line)', fontSize: 10 }}>Space</kbd>{' '}
+                      <kbd style={{ padding: '1px 5px', background: 'var(--jl-bg-sunken)', borderRadius: 3, border: '1px solid var(--jl-line)', fontSize: 10 }}>R</kbd>{' '}
+                      <kbd style={{ padding: '1px 5px', background: 'var(--jl-bg-sunken)', borderRadius: 3, border: '1px solid var(--jl-line)', fontSize: 10 }}>F</kbd>{' '}
+                      {t('timer.shortcutsHint')}
                     </div>
                   </div>
                 </div>

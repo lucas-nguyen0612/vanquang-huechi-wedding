@@ -2,17 +2,16 @@
 import { useEffect, useRef } from 'react'
 import { usePomodoroStore } from '@/store/pomodoroStore'
 
-export function useTimer() {
+export function useTimer({ enabled = true }: { enabled?: boolean } = {}) {
   const isRunning = usePomodoroStore(s => s.isRunning)
   const tick = usePomodoroStore(s => s.tick)
-  const startedAt = usePomodoroStore(s => s.startedAt)
 
-  // RAF-based 1-second ticker
+  // RAF-based 1-second ticker — only runs on the leader tab
   const lastTickRef = useRef<number>(Date.now())
   const rafRef = useRef<number | undefined>(undefined)
 
   useEffect(() => {
-    if (!isRunning) {
+    if (!isRunning || !enabled) {
       if (rafRef.current !== undefined) cancelAnimationFrame(rafRef.current)
       return
     }
@@ -30,11 +29,12 @@ export function useTimer() {
     return () => {
       if (rafRef.current !== undefined) cancelAnimationFrame(rafRef.current)
     }
-  }, [isRunning, tick])
+  }, [isRunning, tick, enabled])
 
-  // Tab visibility: catch up ticks that were missed while hidden
+  // Tab visibility: catch up ticks missed while hidden — only on leader tab
   const hiddenAtRef = useRef<number | null>(null)
   useEffect(() => {
+    if (!enabled) return
     function onHide() {
       if (document.hidden && usePomodoroStore.getState().isRunning) {
         hiddenAtRef.current = Date.now()
@@ -61,5 +61,5 @@ export function useTimer() {
       document.removeEventListener('visibilitychange', onHide)
       document.removeEventListener('visibilitychange', onShow)
     }
-  }, [])
+  }, [enabled])
 }

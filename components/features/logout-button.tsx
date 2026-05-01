@@ -1,16 +1,33 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { type CSSProperties, type ReactNode } from "react";
+import { Button, type ButtonProps } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { signOut } from "@/features/auth/actions";
 
-export function LogoutButton() {
+interface LogoutButtonProps {
+  children?: ReactNode;
+  variant?: ButtonProps["variant"];
+  size?: ButtonProps["size"];
+  className?: string;
+  style?: CSSProperties;
+  "aria-label"?: string;
+}
+
+export function LogoutButton({
+  children = "Logout",
+  ...props
+}: LogoutButtonProps) {
   const router = useRouter();
 
   const logout = async () => {
     await signOut();
-    router.push("/auth/login");
+    router.push("/sign-in");
   };
 
-  return <Button onClick={logout}>Logout</Button>;
+  return (
+    <Button onClick={logout} {...props}>
+      {children}
+    </Button>
+  );
 }

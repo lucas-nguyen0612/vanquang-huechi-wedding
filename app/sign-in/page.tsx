@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -24,6 +25,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
+import { PasswordInput } from '@/components/ui/password-input'
 import { Label } from '@/components/ui/label'
 
 const schema = z.object({
@@ -123,6 +125,16 @@ export default function LoginPage() {
         <div className="flex flex-col gap-6">
           <Card>
             <CardHeader className="text-center">
+              <div className="mx-auto relative h-28 w-28 overflow-hidden rounded-2xl">
+                <Image
+                  src="/logo.png"
+                  alt="JL-Tools logo"
+                  fill
+                  sizes="112px"
+                  style={{ objectFit: 'cover' }}
+                  priority
+                />
+              </div>
               <CardTitle className="text-2xl">JL-Tools</CardTitle>
               <CardDescription>Sign in to continue your journey</CardDescription>
             </CardHeader>
@@ -145,9 +157,8 @@ export default function LoginPage() {
 
                   <div className="grid gap-2">
                     <Label htmlFor="password">Password</Label>
-                    <Input
+                    <PasswordInput
                       id="password"
-                      type="password"
                       autoComplete="current-password"
                       {...register('password')}
                     />
@@ -186,7 +197,7 @@ export default function LoginPage() {
 
                 <p className="text-center text-sm text-muted-foreground">
                   Don&apos;t have an account?{' '}
-                  <Link href="/signup" className="underline underline-offset-4 hover:text-primary">
+                  <Link href="/sign-up" className="underline underline-offset-4 hover:text-primary">
                     Sign up
                   </Link>
                 </p>

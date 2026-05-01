@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import Link from 'next/link'
 
 const NAV_LINKS = ['Tools', 'Progression', 'Guild', 'Pricing', 'Changelog'] as const
@@ -18,25 +19,38 @@ export function LandingNav() {
         zIndex: 50,
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+      <Link
+        href="/"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10,
+          flexShrink: 0,
+          textDecoration: 'none',
+          color: 'inherit',
+        }}
+      >
         <div
           style={{
             width: 28,
             height: 28,
             borderRadius: 7,
-            background: 'var(--jl-text)',
-            color: 'var(--jl-bg)',
-            display: 'grid',
-            placeItems: 'center',
-            fontFamily: 'var(--jl-font-display)',
-            fontWeight: 600,
-            fontSize: 15,
+            overflow: 'hidden',
+            position: 'relative',
+            flexShrink: 0,
           }}
         >
-          J
+          <Image
+            src="/logo.png"
+            alt="JL-Tools logo"
+            fill
+            sizes="28px"
+            style={{ objectFit: 'cover' }}
+            priority
+          />
         </div>
         <span style={{ fontWeight: 600, fontSize: 15 }}>JL-Tools</span>
-      </div>
+      </Link>
 
       <div
         style={{
@@ -81,7 +95,7 @@ export function LandingNav() {
       </div>
 
       <Link
-        href="/login"
+        href="/sign-in"
         style={{
           padding: '8px 16px',
           borderRadius: 'var(--jl-r)',
@@ -99,7 +113,7 @@ export function LandingNav() {
       </Link>
 
       <Link
-        href="/signup"
+        href="/sign-up"
         style={{
           padding: '8px 16px',
           borderRadius: 'var(--jl-r)',

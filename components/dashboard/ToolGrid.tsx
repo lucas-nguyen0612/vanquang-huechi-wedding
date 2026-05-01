@@ -36,6 +36,8 @@ function ToolCard({
           : '1px solid var(--jl-line)',
         position: 'relative',
         overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column',
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -96,6 +98,7 @@ function ToolCard({
       <Link
         href={href}
         style={{
+          marginTop: 'auto',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -185,9 +188,8 @@ export const ToolGrid: FC<ToolGridProps> = ({
           title="Flashcards"
           status={flashcardsDue > 0 ? `${flashcardsDue} due` : 'All caught up!'}
           meta={flashcardsDue > 0 ? 'Cards awaiting review' : 'No cards due today'}
-          ctaLabel="Review Now"
+          ctaLabel="Study"
           href="/flashcards"
-          urgent={flashcardsDue > 0}
         />
       </div>
     </section>

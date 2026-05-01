@@ -99,6 +99,7 @@ export default async function CharacterPage() {
               stats={fallbackStats}
               characterName={characterName}
               characterClass={characterClass}
+              avatarUrl={profile?.avatar_url}
               avatarHref="/settings/profile"
             />
             <StatChart

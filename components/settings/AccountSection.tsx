@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { EmailChangeForm } from './EmailChangeForm'
 import { PasswordChangeForm } from './PasswordChangeForm'
 import { DeleteAccountDialog } from './DeleteAccountDialog'
+import { LogoutButton } from '@/components/features/logout-button'
 
 export async function AccountSection() {
   const supabase = await createClient()
@@ -74,6 +75,29 @@ export async function AccountSection() {
           </p>
         </header>
         <PasswordChangeForm />
+      </section>
+
+      {/* Sign out */}
+      <section style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <header>
+          <h2
+            style={{
+              fontFamily: 'var(--jl-font-display)',
+              fontSize: 16,
+              fontWeight: 600,
+              color: 'var(--jl-text)',
+              margin: 0,
+            }}
+          >
+            Sign out
+          </h2>
+          <p style={{ fontSize: 13, color: 'var(--jl-text-soft)', margin: '4px 0 0' }}>
+            Sign out of this device. Your account and progress are safe.
+          </p>
+        </header>
+        <LogoutButton variant="outline" style={{ alignSelf: 'flex-start' }}>
+          Sign out
+        </LogoutButton>
       </section>
 
       {/* Danger zone */}

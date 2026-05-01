@@ -37,7 +37,7 @@ export default function OnboardingPage() {
     setLoading(true)
     setError(null)
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { router.push('/login'); return }
+    if (!user) { router.push('/sign-in'); return }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await (supabase as any)

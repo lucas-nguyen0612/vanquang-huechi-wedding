@@ -1,10 +1,12 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Target, Timer, Flame, Layers, Swords, Users, Shield, Settings } from 'lucide-react'
+import { Target, Timer, Flame, Layers, Swords, Users, Shield, Settings, LogOut } from 'lucide-react'
 import { Avatar } from '@/components/rpg/Avatar'
 import { XPBar } from '@/components/rpg/XPBar'
+import { LogoutButton } from '@/components/features/logout-button'
 
 type NavItem = {
   href: string
@@ -29,16 +31,17 @@ interface SideNavProps {
   currentXP: number
   maxXP: number
   characterName: string
+  avatarUrl?: string | null
 }
 
-export function SideNav({ level, currentXP, maxXP, characterName }: SideNavProps) {
+export function SideNav({ level, currentXP, maxXP, characterName, avatarUrl }: SideNavProps) {
   const pathname = usePathname()
 
   return (
     <aside
       className="flex flex-col h-full"
       style={{
-        width: 232,
+        width: 200,
         flexShrink: 0,
         background: 'var(--jl-bg-raised)',
         borderRight: '1px solid var(--jl-line-soft)',
@@ -59,16 +62,19 @@ export function SideNav({ level, currentXP, maxXP, characterName }: SideNavProps
             width: 30,
             height: 30,
             borderRadius: 8,
-            background: 'var(--jl-text)',
-            color: 'var(--jl-bg)',
-            display: 'grid',
-            placeItems: 'center',
-            fontFamily: 'var(--jl-font-display)',
-            fontWeight: 600,
-            fontSize: 16,
+            overflow: 'hidden',
+            flexShrink: 0,
+            position: 'relative',
           }}
         >
-          J
+          <Image
+            src="/logo.png"
+            alt="JL-Tools logo"
+            fill
+            sizes="30px"
+            style={{ objectFit: 'cover' }}
+            priority
+          />
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1 }}>
           <span style={{ fontWeight: 600, fontSize: 14, letterSpacing: '-0.01em' }}>
@@ -150,8 +156,8 @@ export function SideNav({ level, currentXP, maxXP, characterName }: SideNavProps
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-          <Avatar level={level} size={40} />
-          <div style={{ minWidth: 0 }}>
+          <Avatar level={level} size={40} avatarUrl={avatarUrl} />
+          <div style={{ minWidth: 0, flex: 1 }}>
             <div
               style={{
                 fontSize: 12,
@@ -168,6 +174,19 @@ export function SideNav({ level, currentXP, maxXP, characterName }: SideNavProps
               Lv {level} · Scholar
             </div>
           </div>
+          <LogoutButton
+            variant="ghost"
+            size="icon"
+            aria-label="Sign out"
+            style={{
+              width: 28,
+              height: 28,
+              color: 'var(--jl-text-faint)',
+              flexShrink: 0,
+            }}
+          >
+            <LogOut size={14} />
+          </LogoutButton>
         </div>
         <XPBar currentXP={currentXP} maxXP={maxXP} level={level} compact showLevel={false} />
         <div

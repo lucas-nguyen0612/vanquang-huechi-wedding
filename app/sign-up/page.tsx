@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -9,6 +10,7 @@ import { z } from 'zod'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { PasswordInput } from '@/components/ui/password-input'
 import { Label } from '@/components/ui/label'
 import {
   Card,
@@ -65,6 +67,16 @@ export default function SignupPage() {
       <div className="w-full max-w-sm">
         <Card>
           <CardHeader className="text-center">
+            <div className="mx-auto relative h-28 w-28 overflow-hidden rounded-2xl">
+              <Image
+                src="/logo.png"
+                alt="JL-Tools logo"
+                fill
+                sizes="112px"
+                style={{ objectFit: 'cover' }}
+                priority
+              />
+            </div>
             <CardTitle className="text-2xl">Create Account</CardTitle>
             <CardDescription>Begin your productivity journey</CardDescription>
           </CardHeader>
@@ -87,9 +99,8 @@ export default function SignupPage() {
 
               <div className="grid gap-2">
                 <Label htmlFor="password">Password</Label>
-                <Input
+                <PasswordInput
                   id="password"
-                  type="password"
                   autoComplete="new-password"
                   aria-invalid={!!errors.password}
                   {...register('password')}
@@ -101,9 +112,8 @@ export default function SignupPage() {
 
               <div className="grid gap-2">
                 <Label htmlFor="confirmPassword">Confirm Password</Label>
-                <Input
+                <PasswordInput
                   id="confirmPassword"
-                  type="password"
                   autoComplete="new-password"
                   aria-invalid={!!errors.confirmPassword}
                   {...register('confirmPassword')}
@@ -127,7 +137,7 @@ export default function SignupPage() {
             <p className="mt-4 text-center text-sm text-muted-foreground">
               Already have an account?{' '}
               <Link
-                href="/login"
+                href="/sign-in"
                 className="font-medium underline underline-offset-4 hover:text-foreground"
               >
                 Sign in

@@ -3,6 +3,7 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { profileUpdateSchema, type ProfileUpdateInput } from '@/features/settings/profile-schemas'
 import { useUpdateProfileMutation } from '@/hooks/useSettings'
@@ -16,6 +17,7 @@ export function DisplayNameForm({ userId, initialValue }: DisplayNameFormProps) 
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [serverError, setServerError] = useState<string | null>(null)
 
+  const router = useRouter()
   const updateMutation = useUpdateProfileMutation(userId)
 
   const {
@@ -37,8 +39,8 @@ export function DisplayNameForm({ userId, initialValue }: DisplayNameFormProps) 
       setServerError(result.error.message)
     } else {
       setSuccessMessage('Saved')
-      // Auto-hide after 3 s
       setTimeout(() => setSuccessMessage(null), 3000)
+      router.refresh()
     }
   }
 

@@ -6,7 +6,7 @@ import { BottomNav } from '@/components/layout/BottomNav'
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const user = await getUser()
 
-  if (!user) redirect('/login')
+  if (!user) redirect('/sign-in')
 
   const supabase = await createClient()
 
@@ -39,6 +39,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           currentXP={xpInLevel}
           maxXP={maxXP}
           characterName={profile?.character_name ?? 'Adventurer'}
+          avatarUrl={profile?.avatar_url}
         />
       </div>
       <main className="flex-1 flex flex-col overflow-hidden pb-16 md:pb-0">

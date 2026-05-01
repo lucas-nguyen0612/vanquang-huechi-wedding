@@ -34,6 +34,7 @@ interface CharacterSheetProps {
   characterName?: string
   characterClass?: string
   title?: string
+  avatarUrl?: string | null
   /** If provided, the avatar will be wrapped in a Link to this href. */
   avatarHref?: string
 }
@@ -43,6 +44,7 @@ export const CharacterSheet: FC<CharacterSheetProps> = ({
   characterName = 'Adventurer',
   characterClass = 'Scholar',
   title,
+  avatarUrl,
   avatarHref,
 }) => {
   const tier = getLevelTier(stats.level)
@@ -63,10 +65,10 @@ export const CharacterSheet: FC<CharacterSheetProps> = ({
       <div style={{ display: 'grid', placeItems: 'center', marginBottom: 14 }}>
         {avatarHref ? (
           <Link href={avatarHref} aria-label="Edit profile" style={{ display: 'block', borderRadius: '50%' }}>
-            <Avatar level={stats.level} size={120} />
+            <Avatar level={stats.level} size={120} avatarUrl={avatarUrl} />
           </Link>
         ) : (
-          <Avatar level={stats.level} size={120} />
+          <Avatar level={stats.level} size={120} avatarUrl={avatarUrl} />
         )}
       </div>
 

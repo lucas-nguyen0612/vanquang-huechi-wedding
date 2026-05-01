@@ -91,7 +91,7 @@ pnpm test            # Run tests
 
 ## Routing
 
-- Auth pages: `/auth/login`, `/auth/sign-up`, `/auth/forgot-password`
+- Auth pages: `/sign-in`, `/sign-up`, `/auth/forgot-password`, `/auth/update-password`
 - Protected pages: `/protected/*` (requires login)
 - Feature pages: `/pomodoro`, `/habits`, `/profile` (Epic 5+)
 

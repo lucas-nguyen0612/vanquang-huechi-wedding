@@ -27,7 +27,7 @@ export function AvatarUpload({ userId, currentAvatarUrl }: AvatarUploadProps) {
   const uploadMutation = useUploadAvatarMutation(userId)
   const removeMutation = useRemoveAvatarMutation(userId)
 
-  const displaySrc = previewUrl ?? '/avatars/default.svg'
+  const displaySrc = previewUrl ?? '/avatars/default.png'
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]

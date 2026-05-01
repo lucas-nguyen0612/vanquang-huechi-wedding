@@ -65,7 +65,7 @@ export function HeroSection() {
 
         <div style={{ display: 'flex', gap: 12, marginTop: 30 }}>
           <Link
-            href="/signup"
+            href="/sign-up"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
